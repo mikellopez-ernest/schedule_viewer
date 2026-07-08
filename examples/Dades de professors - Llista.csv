@@ -1,0 +1,158 @@
+ESP,DEPT.,NOM,COGNOM1,COGNOM2,REDUÏT,SITUACIÓ,DNI,TELF,CORREU XTEC,CORREU INSTIT,BAIXA?,NOUS,ACTIVE
+E. Fís,EFI,Sergio,Adell,Fernández,ADEEFI,SUBST,53384634B,663272779,sadell8@xtec.cat,sergioadell@iernestlluch.cat,FALSE,FALSE,FALSE
+Ang,ANG,Elisabet,Aguiló,Terrones,AGUANG,FUNC. DEF,39905475S,628036681,beth_aguilo@hotmail.com,elisabetaguilo@iernestlluch.cat,FALSE,FALSE,TRUE
+Rel,SOC,Fèlix,Albero,Mercè,ALBSOC,LABORAL,43714620S,659449985,falbero@xtec.cat,felixalbero@iernestlluch.cat,FALSE,FALSE,TRUE
+Cat,CAT,Eva,Alzaga,Dalmases,ALZCAT,FUNC. DEF,46982077T,619222836,ealzaga@xtec.cat,evaalzaga@iernestlluch.cat,FALSE,TRUE,TRUE
+Cast,CAS,Ester,Anguita,Jiménez,ANGCAS,FUNC. DEF,52428822T,686784321,eanguita@xtec.cat,esteranguita@iernestlluch.cat,FALSE,FALSE,FALSE
+E. Fís,EFI,Sergi,Areny,Sole,AREEFI,INT,47902034A,608490871,sareny@xtec.cat,sergiareny@iernestlluch.cat,FALSE,FALSE,FALSE
+Mús.,VIP,Angela,Arnau,Juarez,ARNVIP,SUBST,73101994J,617574074,aarnau8@xtec.cat,angelaarnau@iernestlluch.cat,FALSE,FALSE,FALSE
+Cat,CAT,Lídia,Aznar,Mendieta,AZNCAT,FUNC. DEF,47761384K,679665407,lidia0@hotmail.com,lidiaaznar@iernestlluch.cat,FALSE,FALSE,TRUE
+618 - Perruqueria,PCC,Joana,Baiges,Tomas,BAIPCC,FUNC. SNS PLAÇA,47858755X,689240023,jbaiges1@xtec.cat,joanabaiges@iernestlluch.cat,FALSE,FALSE,FALSE
+FiQ,EXP,Maria Isabel,Barba,Garrancho,BAREXP,FUNC. DEF,47773158L,615114189,mbarba11@xtec.cat,isabelbarba@iernestlluch.cat,FALSE,FALSE,TRUE
+Mat,DIV,Arnau,Bardí,Milà,BARDIV,FUNC. PERFIL,47835745T,669544074,abardi@xtec.cat,arnaubardi@iernestlluch.cat,FALSE,FALSE,TRUE
+Ps-Orient,ORI,Mireia,Beà,Monné,BEÀORI,INT 1/2,48255438N,695030044,mbea6@xtec.cat,mireiabea@iernestlluch.cat,FALSE,FALSE,FALSE
+Bio/Geo,EXP,Raquel,Bejarano,Cañueto,BEJEXP,FUNC. DEF,36522958Q,607627545,rbejaran@xtec.cat,raquelbejarano@iernestlluch.cat,FALSE,FALSE,TRUE
+Ang,ANG,Marc,Blanco,Campos,BLAANG,FUNC. DEF,37383657D,675838621,mblanc12@xtec.cat,marcblanco@iernestlluch.cat,FALSE,FALSE,TRUE
+Dib.,VIP,Irene,Blasco,Boluda,BLAVIP,SUBST,21792318W,692650101,iblasco9@xtec.cat,ireneblasco@iernestlluch.cat,FALSE,FALSE,FALSE
+Ps-Orient,ORI,Núria,Bofarull,Sanz,BOFORI,FUNC. PERFIL,46403212E,636066626,nbofaru2@xtec.cat,nuriabofarull@iernestlluch.cat,FALSE,FALSE,TRUE
+Mat,MAT,Lurdes,Boix,Roca,BOIMAT,FUNC. DEF,40436191Y,655605146,lboix@xtec.cat,lurdesboix@iernestlluch.cat,FALSE,FALSE,TRUE
+Mat,MAT,Ester,Borrull,Blanes,BORMAT,FUNC. SNS PLAÇA,48037353J,625218265,eborrul1@xtec.cat,esterborrull@iernestlluch.cat,FALSE,FALSE,TRUE
+Mús.,VIP,Arnau,Borrull,Blanes,BORVIP,INT 1/2,47839478F,625218253,aborrul6@xtec.cat,arnauborrull@iernestlluch.cat,FALSE,FALSE,TRUE
+Ang,ANG,Judith,Bou,Padro,BOUANG,INT 1/2,77790229C,605587799,jbou7@xtec.cat,judithbou@iernestlluch.cat,FALSE,FALSE,FALSE
+Bio/Geo,DIV,Laura,Briansó,Llort,BRIDIV,FUNC. SNS PLAÇA,47766950K,618897240,lbrianso@xtec.cat,laurabrianso@iernestlluch.cat,FALSE,FALSE,TRUE
+Ps-Orient,ORI,Sandra,Cabré,Muñoz,CABORI,SUBST,48028639Q,669924488,scabre10@xtec.cat,sandracabre@iernestlluch.cat,FALSE,FALSE,FALSE
+Tecn,TEC,Begoña,Cabrero,Grau,CABTEC,FUNC. DEF,47636251P,630605142,bcabrer3@xtec.cat,begonacabrero@iernestlluch.cat,FALSE,FALSE,TRUE
+618 - Perruqueria,PCC,Cecilia,Calabuig,Castellano,CALPCC,FUNC. DEF,46592845C,605893714,ccalabui@xtec.cat,ceciliacalabuig@iernestlluch.cat,FALSE,FALSE,TRUE
+Cat,CAT,Claudia,Calduch,Vendrell,CALCAT,INT,39398250D,631121173,ccalduc1@xtec.cat,claudiacalduch@iernestlluch.cat,FALSE,FALSE,TRUE
+505 - Formació i Orientació Laboral,SOC,Maribel,Camín,Muñoz,CAMSOC,FUNC. DEF,44006171H,616525366,mcamin2@xtec.cat,maribelcamin@iernestlluch.cat,FALSE,FALSE,TRUE
+Cast,CAS,Laura,Cano,Soria,CANCAS,SUBST,39975724E,657470840,lcano8@xtec.cat,lauracano@iernestlluch.cat,FALSE,FALSE,FALSE
+Mús.,VIP,Enric,Capdevila,Mesa,CAPVIP,FUNC. DEF,33961523E,686252390,ecapdev2@xtec.cat,enriccapdevila@iernestlluch.cat,FALSE,FALSE,FALSE
+507 - Informàtica,INF,Meritxell,Cartañá,Pujol,CARINF,INT,52219536Z,619889599,meritxell.cartana@gmail.com,meritxellcartana@iernestlluch.cat,FALSE,FALSE,FALSE
+Cast,CAS,Eva,Castro,Huerta,CASCAS,SUBST,53523456H,646514549,ecastr14@xtec.cat,evacastro@iernestlluch.cat,FALSE,FALSE,FALSE
+Mat,MAT,Sara,Català,Albelda,CATMAT,SUBST,20941814S,603349463,scatala8@xtec.cat,saracatala@iernestlluch.cat,FALSE,FALSE,FALSE
+FiQ,EXP,Gemma,Codina,Fortuny,CODEXP,FUNC. DEF,38449211L,626811759,gcodina@xtec.cat,gemmacodina@iernestlluch.cat,FALSE,FALSE,TRUE
+Ps-Orient,ORI,Núria,Colom,Nichols,COLORI,SUBST,39939021G,689707789,ncolom3@xtec.cat,nuriacolom@iernestlluch.cat,FALSE,FALSE,FALSE
+Ang,ANG,José Manuel,Cuevas,Martín,CUEANG,SUBST,76880544P,634738341,josemcmartin@gmail.com,josemanuelcuevas@iernestlluch.cat,FALSE,FALSE,FALSE
+Filos.,SOC,Pablo,De Benito,David,DE SOC,FUNC. SNS PLAÇA,21008606S,601175183,pdebenit@xtec.cat,pablodebenito@iernestlluch.cat,FALSE,FALSE,FALSE
+E. Fís,EFI,Josep,De Roba,Noguera,DE EFI,SUBST,20495647W,665043756,jderoba@xtec.cat,josepderoba@iernestlluch.cat,FALSE,FALSE,FALSE
+Llat,CAS,Lola,Del Pozo,Gragera,DELCAS,FUNC. SNS PLAÇA,47633808A,670654547,ddelpozo@xtec.cat,loladelpozo@iernestlluch.cat,FALSE,FALSE,TRUE
+510 - Organització i gestió comercial,COM,Barbara,Díaz,Argüelles,DÍACOM,INT,46789329S,658369710,bdiaz22@xtec.cat,barbaradiaz@iernestlluch.cat,FALSE,FALSE,TRUE
+E. Fís,EFI,Iker,Díaz,Gil,DÍAEFI,SUBST,77788166G,619108947,idiaz21@xtec.cat,ikerdiaz@iernestlluch.cat,FALSE,FALSE,FALSE
+Ps-Orient (SIEI),DIV,Mª Teresa,Domínguez,Anton,DOMDIV,INT,39886545Z,660246145,mdomi258@xtec.cat,maitedominguez@iernestlluch.cat,FALSE,FALSE,FALSE
+A. Acoll,CAT,Borja,Donet,Donet,DONCAT,FUNC. SNS PLAÇA,20946740L,633677343,bdonet@xtec.cat,borjadonet@iernestlluch.cat,FALSE,FALSE,TRUE
+Ang,ANG,Gemma,Escudé,Pont,ESCANG,FUNC. DEF,39696020K,659506464,gescude@xtec.cat,gemmaescude@iernestlluch.cat,FALSE,FALSE,TRUE
+Ps-Orient,ORI,Belén,Estrada,García,ESTORI,INT 1/2,47840761W,699225959,,belenestrada@iernestlluch.cat,FALSE,FALSE,FALSE
+Ps-Orient (SIEI),DIV,Noelia,Expósito,Campos,EXPDIV,INT,47639809R,647221428,nexposi1@xtec.cat,noeliaexposito@iernestlluch.cat,FALSE,FALSE,FALSE
+E. Fís,EFI,Rosa,Fallada,Salat,FALEFI,FUNC. DEF,43709741N,625460002,rfallada@xtec.cat,rosafallada@iernestlluch.cat,FALSE,FALSE,TRUE
+Geo/Hª,SOC,Ferran,Fernández,Ordoño,FERSOC,SUBST,39914843E,697614364,fferna50@xtec.cat,ferranfernandez@iernestlluch.cat,FALSE,FALSE,FALSE
+Cat,DIV,Anna,Ferrer,Pujol,FERDIV,FUNC. PERFIL,47626036M,687692618,aferre65@xtec.cat,annaferrer@iernestlluch.cat,FALSE,FALSE,TRUE
+627 - Sistemes i aplicacions informàtiques,INF,Germán,Flores,Caparrós,FLOINF,FUNC. DEF,77743165Z,699140097,gflores4@xtec.cat,germanflores@iernestlluch.cat,FALSE,FALSE,TRUE
+A. Acoll,CAT,Gisela,Font,Montserrat,FONCAT,SUBST,21706564S,638788595,gfont11@xtec.cat,giselafont@iernestlluch.cat,FALSE,FALSE,FALSE
+Mús.,VIP,Marc,Galindo,Moyés,GALVIP,SUBST,45791394G,690700592,marcgalindo92@hotmail.com,marcgalindo@iernestlluch.cat,FALSE,FALSE,FALSE
+Cat,DIV,Aleix,Gallifa,López,GALDIV,INT,39908505D,650449899,agallifa@xtec.cat,aleixgallifa@iernestlluch.cat,FALSE,FALSE,TRUE
+Bio/Geo,EXP,Anna,Galofré,Baró,GALEXP,SUBST,77116971H,620647496,annagalofre@gmail.com,annagalofre@iernestlluch.cat,FALSE,FALSE,FALSE
+621 - Processos comerecials,COM,Cristina,Garcia,Suau,GARCOM,INT 1/2,48018920A,619450897,cgarc190@xtec.cat,cristinagarcia@iernestlluch.cat,FALSE,FALSE,FALSE
+Geo/Hª,SOC,Tània,Garcia,Roman,GARSOC,SUBST,46586781M,696292284,tgarci11@xtec.cat,taniagarcia@iernestlluch.cat,FALSE,FALSE,FALSE
+Bio/Geo,EXP,Mª Jesús,García,Montserrat,GAREXP,FUNC. DEF,52180432X,610405411,mgarc562@xtec.cat,mariajesusgarcia@iernestlluch.cat,FALSE,FALSE,TRUE
+Ang,ANG,Laura,Gil,Gómez,GILANG,FUNC. DEF,52429551Q,696133771,lgil9@xtec.cat,lauragil@iernestlluch.cat,FALSE,FALSE,TRUE
+621 - Processos comerecials,COM,María,Gimeno,Giménez,GIMCOM,FUNC. SNS PLAÇA,20859893C,671709351,mgimen40@xtec.cat ,mariagimeno@iernestlluch.cat,FALSE,FALSE,TRUE
+E. Fís,EFI,Carlos,Gómez,Borredà,GÓMEFI,INT,20495572L,600701491,cgome113@xtec.cat,carlosgomez@iernestlluch.cat,FALSE,FALSE,FALSE
+Ps-Orient,ORI,Rocio,Gómez,Romero,GÓMORI,INT,47765107H,650201843,rgomez51@xtec.cat,rociogomez@iernestlluch.cat,FALSE,FALSE,TRUE
+Cast,CAS,Pau,González,Rubi,GONCAS,SUBST,73103697Z,625909378,paugonzalezrubio98@gmail.com,paugonzalez@iernestlluch.cat,FALSE,FALSE,FALSE
+Cast,CAS,Sílvia,González,Piqué,GONCAS,FUNC. DEF,39718789C,630619909,silviagonza5@gmail.com,silviagonzalez@iernestlluch.cat,FALSE,FALSE,TRUE
+627 - Sistemes i aplicacions informàtiques,COM,Marisa,González,Frías,GONCOM,FUNC. DEF,46458384V,677472223, mgonz775@xtec.cat,marisagonzalez@iernestlluch.cat,FALSE,FALSE,TRUE
+E. Fís,EFI,Juan Sebastián,González,García,GONEFI,SUBST,Y0064223K,648237237,jgonz157@xtec.cat,juansebastiangonzalez@iernestlluch.cat,FALSE,FALSE,FALSE
+Ps-Orient (SIEI),DIV,Ana,Gonzalo,Velasco,GONDIV,INT 1/2,71930484P,622117463,agonz191@xtec.cat,anagonzalo@iernestlluch.cat,FALSE,FALSE,FALSE
+Geo/Hª,SOC,Rubén,Guim,Domenech,GUISOC,FUNC. SNS PLAÇA,39726275P,665039235, rguim4@xtec.cat,rubenguim@iernestlluch.cat,FALSE,FALSE,TRUE
+Cat,CAT,Xavi,Guitart,Naya,GUICAT,FUNC. SNS PLAÇA,53627257C,636391470,jguita10@xtec.cat,xaviguitart@iernestlluch.cat,FALSE,FALSE,TRUE
+Mat,MAT,Freddy,Higuera,Porras,HIGMAT,INT,04697639G,644335375,fhiguera@xtec.cat,freddyhiguera@iernestlluch.cat,FALSE,FALSE,TRUE
+E. Fís,EFI,Cándido,Huerta,Giner,HUEEFI,SUBST,20458934C,665921991,chuerta@xtec.cat,candidohuerta@iernestlluch.cat,FALSE,FALSE,FALSE
+Mat,MAT,Marcos,Ibañez,Llop,IBAMAT,INT 1/2,43687462F,616101094,marcos.ibanez@upf.edu,marcosibanez@iernestlluch.cat,FALSE,FALSE,FALSE
+Bio/Geo,EXP,Míriam,Izquierdo,Martí,IZQEXP,FUNC. SNS PLAÇA,46968656B,626349524,mizqui12@xtec.cat,miriamizquierdo@iernestlluch.cat,FALSE,FALSE,TRUE
+Cast,CAS,Carla,Jiménez,Colom,JIMCAS,SUBST,47841722C,664016412,cjimen78@xtec.cat,carlajimenez@iernestlluch.cat,FALSE,FALSE,FALSE
+Bio/Geo,EXP,Marta,Jové,Vilardell,JOVEXP,FUNC. DEF,43543933B ,615085540,mjove247@xtec.cat,martajove@iernestlluch.cat,FALSE,FALSE,TRUE
+621 - Processos comerecials,COM,Laura,Juez,Caballero,JUECOM,INT 1/2,53334958M,633941695,ljuez@xtec.cat,laurajuez@iernestlluch.cat,FALSE,FALSE,FALSE
+Mat,MAT,Anna,Lagunas,Magrans,LAGMAT,FUNC. DEF,52598102T,679637161,annalag@hotmail.com,annalagunas@iernestlluch.cat,FALSE,FALSE,TRUE
+Ps-Orient,ORI,Diego,Lasheras,Porto,LASORI,SUBST,48027342F,653282102,dlasher1@xtec.cat,diegolasheras@iernestlluch.cat,FALSE,FALSE,FALSE
+618 - Perruqueria,PCC,María Pilar,León,Crespo,MALEPCC,SUBST,39679280W,622132194,mleon18@xtec.cat,pilarleon@iernestlluch.cat,FALSE,FALSE,TRUE
+618 - Perruqueria,PCC,Maria Jose,León,Crespo,PILEPCC,INT,39679279R,649588631,mj.sechu@hotmail.com,mariajoseleon@iernestlluch.cat,FALSE,FALSE,TRUE
+Cat,CAT,Cristina,Lledó,Fonollosa,LLECAT,INT,35096534Y,687883815,clledo@xtec.cat,christinalledo@iernestlluch.cat,FALSE,FALSE,FALSE
+627 - Sistemes i aplicacions informàtiques,INF,Mikel,López,Villarroya,LÓPINF,FUNC. DEF,44616056N,686503045,mlope868@xtec.cat,mikellopez@iernestlluch.cat,FALSE,FALSE,TRUE
+Mat,MAT,Lucas,Maia,Campos,MAIMAT,FUNC. SNS PLAÇA,Y9174196Q,644862786,lmaia@xtec.cat,lucasmaia@iernestlluch.cat,FALSE,FALSE,TRUE
+Geo/Hª,SOC,Francesc,Marco,Palau,MARSOC,SUBST,47774193L,609206987,fmarco1@xtec.cat,francescmarco@iernestlluch.cat,FALSE,FALSE,FALSE
+Cat,DIV,Victòria,Marcos,Pallarès,MARDIV,FUNC. DEF,52306302R,679861534,campe@gmx.net,vickymarcos@iernestlluch.cat,FALSE,FALSE,TRUE
+PAES,DIV,Núria,Marín,Cano,MARDIV,LABORAL,47841406A,662045429,nmarin5@xtec.cat,nuriamarin@iernestlluch.cat,FALSE,FALSE,FALSE
+Bio/Geo,EXP,Patrizia,Marinelli,,MAREXP,SUBST,Y1711423F,671267686,pmarinel@xtec.cat,patriziamarinelli@iernestlluch.cat,FALSE,FALSE,FALSE
+Bio/Geo,EXP,Alba,Martínez,López,MAREXP,SUBST,52424752R,646980952,amart501@xtec.cat,albamartinez@iernestlluch.cat,FALSE,FALSE,FALSE
+Dib.,VIP,Irene,Martínez,Arenas,MARVIP,FUNC. SNS PLAÇA,48155814R,695930822,imart134@xtec.cat,irenemartinez@iernestlluch.cat,FALSE,FALSE,FALSE
+Mat,MAT,Luís,Martínez,López,MARMAT,FUNC. SNS PLAÇA,07517306D,650298261,lmart131@xtec.cat,luismartinez@iernestlluch.cat,FALSE,FALSE,TRUE
+PAES,DIV,Felicitas,Martínez,Valderrabano,FELDIV,LABORAL,44190568R,616306276,fmart4@xtec.cat,felicitasmartinez@iernestlluch.cat,FALSE,FALSE,TRUE
+Cat,CAT,Alex,Maspoch,Luque,MASCAT,FUNC. DEF,48101782L,692032397,amaspoch@xtec.cat,alexmaspoch@iernestlluch.cat,FALSE,FALSE,TRUE
+618 - Perruqueria,PCC,Paloma,Medina,Vidal,MEDPCC,SUBST,33925771N,620842685,pmedina7@xtec.cat,palomamedina@iernestlluch.cat,FALSE,FALSE,FALSE
+Mat,MAT,Pablo,Migliorelli,Falcone,MIGMAT,FUNC. DEF,48180135B,669769258,pmiglior@xtec.cat,pablomigliorelli@iernestlluch.cat,FALSE,FALSE,TRUE
+627 - Sistemes i aplicacions informàtiques,INF,Alejandro,Milán,Cruz,MILINF,FUNC. DEF,47636497R,628327132,amilan1@xtec.cat,alejandromilan@iernestlluch.cat,FALSE,FALSE,TRUE
+Ang,ANG,Jezabel,Molina,Calvo,MOLANG,SUBST,49632655N,617080356,jmolin67@xtec.cat,jezabelmolina@iernestlluch.cat,FALSE,FALSE,FALSE
+FiQ,EXP,Begoña,Mollà,Tormo,MOLEXP,INT,20448920B,661440522,bmolla@xtec.cat,begonamolla@iernestlluch.cat,FALSE,FALSE,FALSE
+618 - Perruqueria,PCC,Ángeles,Moriel,Carmona,MORPCC,FUNC. DEF,39692093G,676406302,amoriel@xtec.cat,angelesmoriel@iernestlluch.cat,FALSE,FALSE,TRUE
+Ps-Orient,ORI,Mercè,Munné,Canals,MUNORI,FUNC. PERFIL,77317103G,609241583,mmunne9@xtec.cat,mercemunne@iernestlluch.cat,FALSE,FALSE,TRUE
+Cast,CAS,Teresa,Muñoz,Lafuente,MUÑCAS,FUNC. DEF,33960808C,675473865,mmunoz45@xtec.cat,teremunoz@iernestlluch.cat,FALSE,FALSE,TRUE
+Tecn,TEC,Ingrid,Muñoz,Fernández,MUÑTEC,FUNC. SNS PLAÇA,47878466X,655558723,imunoz14@xtec.cat,ingridmunoz@iernestlluch.cat,FALSE,FALSE,TRUE
+Econ,SOC,Apolonia,Muñoz,Nuñez,MUÑSOC,FUNC. DEF,46737030H,645018389,amunoz74@xtec.cat,lonimunoz@iernestlluch.cat,FALSE,TRUE,TRUE
+Tecn,TEC,Miguel,Ochoa,Velasco,OCHTEC,FUNC. SNS PLAÇA,45791988T,675095695,mochoa7@xtec.cat,miguelochoa@iernestlluch.cat,FALSE,FALSE,FALSE
+Dib.,VIP,Marta,Osés,Ursua,OSÉVIP,FUNC. DEF,33436949D,699054243,artsandcraffts@gmail.com,martaoses@iernestlluch.cat,FALSE,FALSE,TRUE
+Geo/Hª,SOC,Ramón,Paraiso,Gallardo,PARSOC,FUNC. DEF,39724709Y,657214441,rparaiso@xtec.cat,ramonparaiso@iernestlluch.cat,FALSE,FALSE,TRUE
+Geo/Hª,SOC,Cristian,Pascual,Monfort,PASSOC,FUNC. SNS PLAÇA,73399433Q,610282689,cpascu13@xtec.cat,cristianpascual@iernestlluch.cat,FALSE,FALSE,TRUE
+Mat,MAT,Joan,Pascual,Segarra,PASMAT,SUBST,49316885D,688329319,joanpascualsegarra@gmail.com,joanpascual@iernestlluch.cat,FALSE,FALSE,FALSE
+Ang,ANG,Amanda Maria,Pérez,Buria,PÉRANG,SUBST,39943297W,662240593,apere173@xtec.cat,amandaperez@iernestlluch.cat,FALSE,FALSE,FALSE
+Cat,DIV,Begoña,Piqueras,Federio,PIQDIV,INT,35095190L,600308308,bpiquer2@xtec.cat,begonapiqueras@iernestlluch.cat,FALSE,FALSE,FALSE
+Ang,ANG,Meritxell,Pons,Romeu,PONANG,FUNC. DEF,77787224M,616631161,mpons234@xtec.cat,meritxellpons@iernestlluch.cat,FALSE,FALSE,TRUE
+Tecn,TEC,Juan Francisco,Pulido,Vargas,PULTEC,INT 1/2,52423663Q,603400925,jpulido7@xtec.cat,juanfpulido@iernestlluch.cat,FALSE,FALSE,FALSE
+Geo/Hª,SOC,Jorge Juan,Quílez,Mata,QUÍSOC,FUNC. DEF,39710244P,669659885,jquilez6@xtec.cat,jorgequilez@iernestlluch.cat,FALSE,FALSE,TRUE
+Tecn,TEC,Inés,Recio,Riesco,RECTEC,SUBST,70874634L,640041810,irecio@xtec.cat,inesrecio@iernestlluch.cat,FALSE,FALSE,FALSE
+Mat,MAT,María,Ricart,Montenegro,RICMAT,SUBST,47837226D,676449802,mariaricart91@gmail.com,mariaricart@iernestlluch.cat,FALSE,FALSE,FALSE
+PFI - F82 - P.gestió admi.,COM,Sergi,Romagosa,Gonzalo,ROMCOM,INT,47743130Y,627637406,sromago1@xtec.cat,sergiromagosa@iernestlluch.cat,FALSE,FALSE,TRUE
+Cat,CAT,Oriol,Romero,Galisteo,ROMCAT,FUNC. DEF,48020117G,654498630,oromero1@xtec.cat,oriolromero@iernestlluch.cat,FALSE,FALSE,TRUE
+Bio/Geo,EXP,Antònia,Rosselló,Graell,ROSEXP,SUBST,46561569R,640760504,arossel9@xtec.cat,antoniarossello@iernestlluch.cat,FALSE,FALSE,FALSE
+Ps-Orient,ORI,Lioba,Rovira,Calaf,ROVORI,INT,47844050W,646294618,lrovir12@xtec.cat,liobarovira@iernestlluch.cat,FALSE,FALSE,FALSE
+Ps-Orient,ORI,Montserrat,Ruiz,Hernandez,RUIORI,INT,47630534H,635537532,mruiz109@xtec.cat,montserratruiz@iernestlluch.cat,FALSE,FALSE,TRUE
+FiQ,EXP,Josep Maria,Salvador,Duch,SALEXP,FUNC. SNS PLAÇA,39705399Q,625145852,jsalva34@xtec.cat,josepmariasalvador@iernestlluch.cat,FALSE,FALSE,TRUE
+Ang,ANG,Cristina,Sánchez,Rubio,SÁNANG,SUBST,46941416A,619557420,msanc160@xtec.cat,cristinasanchez@iernestlluch.cat,FALSE,FALSE,FALSE
+Econ,SOC,Angel,Sánchez,Del Río,SÁNSOC,INT,70981935W,619819635,asanc270@xtec.cat,angelsanchez@iernestlluch.cat,FALSE,FALSE,FALSE
+Tecn,TEC,Esther,Sancho,Arandiga,SANTEC,FUNC. DEF,20457908Y,628000447,esanch8@xtec.cat,estersancho@iernestlluch.cat,FALSE,FALSE,TRUE
+621 - Processos comerecials,COM,Carla,Segura,Novell,SEGCOM,SUBST,77791966D,657107073,csegur22@xtec.cat,carlasegura@iernestlluch.cat,FALSE,FALSE,FALSE
+Cast,CAS,Jordà,Sevilla,Fando,SEVCAS,FUNC. DEF,46224748S,699093109,jsevill2@xtec.cat,jordasevilla@iernestlluch.cat,FALSE,FALSE,TRUE
+E. Fís,DIV,Víctor,Sobrepera,Carretero,SOBDIV,FUNC. PERFIL,47770728G,647518337,vsobrepe@xtec.cat,victorsobrepera@iernestlluch.cat,FALSE,FALSE,TRUE
+Ps-Orient,ORI,Amaya,Sojo,Faura,SOJORI,FUNC. PERFIL,52428584S,630578644,asojo@xtec.cat,amayasojo@iernestlluch.cat,FALSE,FALSE,TRUE
+Ang,ANG,Mireia,Soler,Boix,SOLANG,FUNC. SNS PLAÇA,48000752M,639492770,msoler70@xtec.cat,mireiasoler@iernestlluch.cat,FALSE,FALSE,FALSE
+Francès,ANG,Fátima,Soriano,Plasencia,SORANG,FUNC. DEF,44790864C,666112108,fsorian3@xtec.cat,fatimasoriano@iernestlluch.cat,FALSE,FALSE,FALSE
+A. Acoll,CAT,Yolanda,Soto,Prior,SOTCAT,FUNC. SNS PLAÇA,48153018B,648967630,ysoto@xtec.cat,yolandasoto@iernestlluch.cat,FALSE,FALSE,TRUE
+Cast,CAS,Coral,Suero,González,SUECAS,FUNC. DEF,41007870C,678548531,csuero1@xtec.cat,coralsuero@iernestlluch.cat,FALSE,FALSE,TRUE
+Tecn,TEC,Josep Maria,Tarrida,Capdevila,TARTEC,SUBST,43520608P,625121224,jtarrid5@xtec.cat,josepmariatarrida@iernestlluch.cat,FALSE,FALSE,FALSE
+507 - Informàtica,INF,Ana Victoria,Teruel,Triguero,TERINF,INT,47756281R,622100119,aterue10@xtec.cat,anateruel@iernestlluch.cat,FALSE,FALSE,TRUE
+Geo/Hª,SOC,Raimon Jaume,Tormo,Albelda,TORSOC,FUNC. DEF,20839523M,637414650,rtormo4@xtec.cat,raimontormo@iernestlluch.cat,FALSE,FALSE,TRUE
+Ang,ANG,Mireia,Trejo,Domingo,TREANG,SUBST,47843656E,645981625,mtrejo1@xtec.cat,mireiatrejo@iernestlluch.cat,FALSE,FALSE,FALSE
+507 - Informàtica,INF,Oriol,Trillas,Roig,TRIINF,FUNC. DEF,39722263K,620796075,otrillas@xtec.cat,orioltrillas@iernestlluch.cat,FALSE,FALSE,TRUE
+Bio/Geo,EXP,Míriam,Ureña,Valero,UREEXP,INT 1/2,35604817N,722191814,murena5@xtec.cat,miriamurena@iernestlluch.cat,FALSE,FALSE,FALSE
+Ang,ANG,Kristal,Veiga,Novoa,VEIANG,FUNC. DEF,53176359Z,607777822,kveiga@xtec.cat,kristalveiga@iernestlluch.cat,FALSE,FALSE,TRUE
+Mat,MAT,Andreu,Ventosa,Dasca,VENMAT,SUBST,47774948S,618202160,aventos3@xtec.cat,andreuventosa@iernestlluch.cat,FALSE,FALSE,FALSE
+Mat,MAT,Mat6,,,MAT,,,,,,FALSE,FALSE,FALSE
+Mat,MAT,Mat8 (Florence),,,MAT,,,,,,FALSE,FALSE,FALSE
+Mat,MAT,Mat9 (A/B),,,MAT,,,,,,FALSE,FALSE,FALSE
+Mat,MAT,Mat10 (Red Pablo),,,MAT,,,,,,FALSE,FALSE,FALSE
+Tecn,TEC,Tec4,,,TEC,,,,,,FALSE,FALSE,FALSE
+Ang,ANG,Prof2_Ang (1/2 Meritxell),,,ANG,,,,,,FALSE,FALSE,FALSE
+Ang,ANG,Prof1_Ang (Mireia),,,ANG,,,,,,FALSE,FALSE,FALSE
+Francès,ANG,Prof1_Fra,,,ANG,,,,,,FALSE,FALSE,FALSE
+Cast,CAS,Cas01,,,CAS,,,,,,FALSE,FALSE,FALSE
+Dib.,VIP,Mitja Vip,,,VIP,,,,,,FALSE,FALSE,FALSE
+FiQ,EXP,Fiq1,,,EXP,,,,,,FALSE,FALSE,FALSE
+E. Fís,EFI,Ef1,,,EFI,,,,,,FALSE,FALSE,FALSE
+E. Fís,EFI,Ef2,,,EFI,,,,,,FALSE,FALSE,FALSE
+Ps-Orient (SIEI),DIV,Siei05,,,DIV,,,,,,FALSE,FALSE,FALSE
+Filos.,SOC,Almudena,Torres,García,TOR2SOC,FUNC. DEF,45912776S,622046888,atorr147@xtec.cat,almudenatorres@iernestlluch.cat,FALSE,TRUE,TRUE
+PFI - FPS - Or.educativa,COM,PFI,,,PFI,,,,,,FALSE,FALSE,FALSE
+Ps-Orient (SIEI),DIV,Noelia,Zurita,Conte,ZUDIV,INT,73203298W,620629113,nzurita@xtec.cat,noeliazurita@iernestlluch.cat,FALSE,TRUE,TRUE
+Mús.,VIP,Fernando,Oriola,Requena,ORVIP,FUNC. SNS PLAÇA,20846909p,34635888753,foriola@xtec.cat,fernandooriola@iernestlluch.cat,FALSE,TRUE,TRUE
+621 - Processos comerecials,COM,Gabriel,Puig,Martín,PUCOM,INT.,46563362T,643815904,gpuig22@xtec.cat,gabrielpuig@iernestlluch.cat,FALSE,TRUE,TRUE
+Ps-Orient (SIEI),ORI,Sara,Ballesteros,García,BAORI,INT.,48026250L,660603669,sballe11@xtec.cat,saraballesteros@iernestlluch.cat,FALSE,TRUE,TRUE
+Ang,ANG,Jordi,Sanfeliu,Mesquida,SANANG,FUNC. DEF,39883373Q,636690674,jsanfel1@xtec.cat,jordisanfeliu@iernestlluch.cat,FALSE,TRUE,TRUE

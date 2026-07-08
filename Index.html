@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      :root {
+        --bg: #f6f7f9;
+        --surface: #ffffff;
+        --text: #1f2933;
+        --muted: #667085;
+        --line: #d8dee8;
+        --header: #eef2f7;
+        --accent: #1769aa;
+        --accent-strong: #0f4f87;
+        --subject-bg: #edf7f6;
+        --subject-line: #7fc7bd;
+        --shadow: 0 12px 32px rgba(16, 24, 40, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 14px;
+        line-height: 1.35;
+      }
+
+      .app {
+        width: min(1480px, 100%);
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: 0;
+      }
+
+      .status {
+        color: var(--muted);
+        font-size: 13px;
+        text-align: right;
+      }
+
+      .filters {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(180px, 1fr)) auto;
+        gap: 12px;
+        align-items: end;
+        margin-bottom: 18px;
+      }
+
+      label {
+        display: grid;
+        gap: 5px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      select,
+      button {
+        min-height: 40px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--surface);
+        color: var(--text);
+        font: inherit;
+      }
+
+      select {
+        width: 100%;
+        padding: 0 10px;
+      }
+
+      button {
+        padding: 0 14px;
+        border-color: var(--accent);
+        background: var(--accent);
+        color: #ffffff;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: var(--accent-strong);
+      }
+
+      .schedule-wrap {
+        overflow-x: auto;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      table {
+        width: 100%;
+        min-width: 920px;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--line);
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--header);
+        padding: 10px;
+        font-size: 13px;
+        text-align: left;
+      }
+
+      th.slot-head,
+      td.slot {
+        width: 76px;
+        text-align: center;
+      }
+
+      td {
+        height: 104px;
+        padding: 8px;
+      }
+
+      td.slot {
+        background: #fafbfc;
+        color: var(--muted);
+        font-weight: 700;
+        vertical-align: middle;
+      }
+
+      .cell-items {
+        display: grid;
+        gap: 7px;
+      }
+
+      .item {
+        display: grid;
+        gap: 2px;
+        padding: 7px;
+        border-left: 4px solid var(--subject-line);
+        border-radius: 6px;
+        background: var(--subject-bg);
+        overflow-wrap: anywhere;
+      }
+
+      .subject {
+        font-weight: 800;
+        color: #134e4a;
+      }
+
+      .meta {
+        color: #344054;
+        font-size: 12px;
+      }
+
+      .empty {
+        color: #98a2b3;
+        font-size: 12px;
+      }
+
+      @media (max-width: 860px) {
+        .app {
+          padding: 12px;
+        }
+
+        .topbar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .status {
+          text-align: left;
+        }
+
+        .filters {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .filters button {
+          grid-column: 1 / -1;
+        }
+      }
+
+      @media (max-width: 540px) {
+        h1 {
+          font-size: 20px;
+        }
+
+        .filters {
+          grid-template-columns: 1fr;
+        }
+
+        table {
+          min-width: 760px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div>
+          <h1>Schedule Viewer</h1>
+        </div>
+        <div id="status" class="status"></div>
+      </header>
+
+      <section class="filters" aria-label="Schedule filters">
+        <label>
+          Teacher
+          <select id="teacherFilter" data-filter-key="teacherAlias">
+            <option value="">All teachers</option>
+          </select>
+        </label>
+        <label>
+          Group
+          <select id="groupFilter" data-filter-key="group">
+            <option value="">All groups</option>
+          </select>
+        </label>
+        <label>
+          Classroom
+          <select id="classroomFilter" data-filter-key="classroom">
+            <option value="">All classrooms</option>
+          </select>
+        </label>
+        <label>
+          Subject
+          <select id="subjectFilter" data-filter-key="subject">
+            <option value="">All subjects</option>
+          </select>
+        </label>
+        <button id="resetButton" type="button">Clear</button>
+      </section>
+
+      <main class="schedule-wrap" aria-label="Schedule table">
+        <table>
+          <thead id="scheduleHead"></thead>
+          <tbody id="scheduleBody"></tbody>
+        </table>
+      </main>
+    </div>
+
+    <script>
+      const APP_DATA = <?!= bootstrapJson ?>;
+
+      const selects = [
+        document.getElementById('teacherFilter'),
+        document.getElementById('groupFilter'),
+        document.getElementById('classroomFilter'),
+        document.getElementById('subjectFilter'),
+      ];
+
+      const scheduleHead = document.getElementById('scheduleHead');
+      const scheduleBody = document.getElementById('scheduleBody');
+      const statusEl = document.getElementById('status');
+      const resetButton = document.getElementById('resetButton');
+
+      const filterOptionMap = {
+        teacherFilter: APP_DATA.filters.teachers,
+        groupFilter: APP_DATA.filters.groups,
+        classroomFilter: APP_DATA.filters.classrooms,
+        subjectFilter: APP_DATA.filters.subjects,
+      };
+
+      init();
+
+      function init() {
+        populateSelects();
+        renderHeader();
+        bindEvents();
+        renderSchedule();
+      }
+
+      function populateSelects() {
+        selects.forEach(function(select) {
+          const options = filterOptionMap[select.id] || [];
+          options.forEach(function(option) {
+            const optionEl = document.createElement('option');
+            optionEl.value = option.value;
+            optionEl.textContent = option.label;
+            select.appendChild(optionEl);
+          });
+        });
+      }
+
+      function bindEvents() {
+        selects.forEach(function(select) {
+          select.addEventListener('change', function(event) {
+            if (event.target.value) {
+              resetOtherSelects(event.target);
+            }
+            renderSchedule();
+          });
+        });
+
+        resetButton.addEventListener('click', function() {
+          selects.forEach(function(select) {
+            select.value = '';
+          });
+          renderSchedule();
+        });
+      }
+
+      function resetOtherSelects(activeSelect) {
+        selects.forEach(function(select) {
+          if (select !== activeSelect) {
+            select.value = '';
+          }
+        });
+      }
+
+      function renderHeader() {
+        const row = document.createElement('tr');
+        const slotHead = document.createElement('th');
+        slotHead.className = 'slot-head';
+        slotHead.textContent = 'Slot';
+        row.appendChild(slotHead);
+
+        APP_DATA.days.forEach(function(day) {
+          const th = document.createElement('th');
+          th.textContent = day.label;
+          row.appendChild(th);
+        });
+
+        scheduleHead.replaceChildren(row);
+      }
+
+      function renderSchedule() {
+        const activeFilter = getActiveFilter();
+        const rows = filterRows(activeFilter);
+        const grid = groupRowsBySlotAndDay(rows);
+        const fragment = document.createDocumentFragment();
+
+        APP_DATA.slots.forEach(function(slot) {
+          const tr = document.createElement('tr');
+          const slotCell = document.createElement('td');
+          slotCell.className = 'slot';
+          slotCell.textContent = slot;
+          tr.appendChild(slotCell);
+
+          APP_DATA.days.forEach(function(day) {
+            const td = document.createElement('td');
+            renderCellItems(td, grid[slot + '-' + day.value] || [], activeFilter);
+            tr.appendChild(td);
+          });
+
+          fragment.appendChild(tr);
+        });
+
+        scheduleBody.replaceChildren(fragment);
+        updateStatus(activeFilter, rows.length);
+      }
+
+      function getActiveFilter() {
+        const selected = selects.find(function(select) {
+          return select.value;
+        });
+
+        if (!selected) {
+          return null;
+        }
+
+        return {
+          key: selected.dataset.filterKey,
+          value: selected.value,
+          label: selected.options[selected.selectedIndex].text,
+        };
+      }
+
+      function filterRows(activeFilter) {
+        if (!activeFilter) {
+          return [];
+        }
+
+        return APP_DATA.scheduleRows.filter(function(row) {
+          return row[activeFilter.key] === activeFilter.value;
+        });
+      }
+
+      function groupRowsBySlotAndDay(rows) {
+        return rows.reduce(function(grid, row) {
+          const key = row.slotNumber + '-' + row.dayNumber;
+          if (!grid[key]) {
+            grid[key] = [];
+          }
+          grid[key].push(row);
+          return grid;
+        }, {});
+      }
+
+      function renderCellItems(cell, items, activeFilter) {
+        if (!items.length) {
+          return;
+        }
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'cell-items';
+
+        groupScheduleItems(items, activeFilter).forEach(function(item) {
+          const itemEl = document.createElement('div');
+          itemEl.className = 'item';
+          renderScheduleItem(itemEl, item);
+          wrapper.appendChild(itemEl);
+        });
+
+        cell.appendChild(wrapper);
+      }
+
+      function groupScheduleItems(items, activeFilter) {
+        const schema = getCellSchema(activeFilter);
+        const grouped = new Map();
+
+        items.forEach(function(item) {
+          const display = buildCellDisplay(item, schema);
+          const key = display.keyParts.join('\u001f');
+
+          if (!grouped.has(key)) {
+            grouped.set(key, {
+              title: display.title,
+              line1Values: [],
+              line1Set: new Set(),
+              line2: display.line2,
+            });
+          }
+
+          const groupedItem = grouped.get(key);
+
+          display.line1Values.forEach(function(value) {
+            if (value && !groupedItem.line1Set.has(value)) {
+              groupedItem.line1Set.add(value);
+              groupedItem.line1Values.push(value);
+            }
+          });
+        });
+
+        return Array.from(grouped.values());
+      }
+
+      function getCellSchema(activeFilter) {
+        if (!activeFilter) {
+          return {
+            title: 'subject',
+            line1: 'group',
+            line2: 'classroom',
+            keyFields: ['subject', 'classroom'],
+          };
+        }
+
+        if (activeFilter.key === 'teacherAlias') {
+          return {
+            title: 'subject',
+            line1: 'group',
+            line2: 'classroom',
+            keyFields: ['subject', 'classroom'],
+          };
+        }
+
+        if (activeFilter.key === 'group') {
+          return {
+            title: 'subject',
+            line1: 'teacher',
+            line2: 'classroom',
+            keyFields: ['subject', 'classroom'],
+          };
+        }
+
+        if (activeFilter.key === 'classroom') {
+          return {
+            title: 'subject',
+            line1: 'teacher',
+            line2: 'group',
+            keyFields: ['subject', 'group'],
+          };
+        }
+
+        if (activeFilter.key === 'subject') {
+          return {
+            title: 'teacher',
+            line1: 'group',
+            line2: 'classroom',
+            keyFields: ['teacher', 'classroom'],
+          };
+        }
+
+        return {
+          title: 'subject',
+          line1: 'group',
+          line2: 'classroom',
+          keyFields: ['subject', 'classroom'],
+        };
+      }
+
+      function buildCellDisplay(item, schema) {
+        return {
+          title: getDisplayField(item, schema.title) || 'No subject',
+          line1Values: toDisplayValues(getDisplayField(item, schema.line1)),
+          line2: getDisplayField(item, schema.line2),
+          keyParts: schema.keyFields.map(function(field) {
+            return getDisplayField(item, field) || '';
+          }),
+        };
+      }
+
+      function getDisplayField(item, field) {
+        if (field === 'subject') {
+          return item.subject;
+        }
+
+        if (field === 'group') {
+          return item.group;
+        }
+
+        if (field === 'teacher') {
+          return item.teacherName || item.teacherAlias;
+        }
+
+        if (field === 'classroom') {
+          return item.classroom;
+        }
+
+        return '';
+      }
+
+      function toDisplayValues(value) {
+        if (!value) {
+          return [];
+        }
+
+        if (Array.isArray(value)) {
+          return value.filter(Boolean);
+        }
+
+        return [value];
+      }
+
+      function renderScheduleItem(parent, item) {
+        appendLine(parent, item.title || 'No subject', 'subject');
+        appendOptionalLine(parent, item.line1Values.join(', '), 'meta');
+        appendOptionalLine(parent, item.line2, 'meta');
+      }
+
+      function appendLine(parent, text, className) {
+        const line = document.createElement('div');
+        line.className = className;
+        line.textContent = text;
+        parent.appendChild(line);
+      }
+
+      function appendOptionalLine(parent, text, className) {
+        if (text) {
+          appendLine(parent, text, className);
+        }
+      }
+
+      function updateStatus(activeFilter, count) {
+        if (!activeFilter) {
+          statusEl.textContent = 'Select a filter';
+          return;
+        }
+
+        statusEl.textContent = activeFilter.label + ' · ' + count + ' rows';
+      }
+    </script>
+  </body>
+</html>
