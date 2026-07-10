@@ -9,36 +9,38 @@ The page must support viewing and filtering schedules by:
 - teacher
 - school group
 - classroom
-- subject
+- subject, planned but hidden in the current UI
 
 ## Endpoint Behavior
 
 The Apps Script web endpoint must:
 
-1. Load the data for `Horaris` and `Dades de professors` into memory for the request.
+1. Load the data for `Horaris`, `Dades de professors`, and `Càrrega lectiva` into memory for the request.
 2. Always resolve and read those tables from the Google Spreadsheet database identified by the `db` script property.
 3. Render a responsive HTML page.
-4. Show four select controls:
+4. Show three visible select controls:
    - teacher
    - school group
    - classroom
-   - subject
-5. Build the available select values from the in-memory `Horaris`, `Dades de professors`.`Llista`, and `Dades de professors`.`leave_absence` data.
-6. Reset the other three select controls whenever one select control receives a value.
-7. Provide a clear/reset button that clears all select controls and returns the schedule table to the initial empty state.
-8. Present the schedule as a grid:
+5. Keep the fourth subject select/filter as a planned control, but hide it for now.
+6. Build the available select values from the in-memory `Horaris`, `Dades de professors`.`Llista`, `Dades de professors`.`leave_absence`, and `Càrrega lectiva`.`assignatures` data.
+7. Reset the other visible select controls whenever one visible select control receives a value.
+8. Provide a clear/reset button that clears all select controls and returns the schedule table to the initial empty state.
+9. Present the schedule as a grid:
    - rows are time slots `1` through `12`
    - columns are weekdays Monday through Friday
-9. Always show all 12 time-slot rows, even when a row has no matching schedule item.
-10. Show matching schedule information in the relevant day/time cell when a filter is active.
+10. Always show all 12 time-slot rows, even when a row has no matching schedule item.
+11. Show matching schedule information in the relevant day/time cell when a filter is active.
+12. Show an admin-only schedule upload button for the configured administrator user.
+13. Show a non-admin `PRINT` button for all users except the configured administrator.
 
 Filtering rules:
 
 - Teacher filter matches the effective teacher code for a schedule row. The stored/source teacher code in `Horaris` column 3 is a `REDUIT`; if that teacher is on active leave, resolve to the substitute `REDUIT` before filtering/displaying.
 - School group filter matches `Horaris` column 2.
 - Classroom filter matches `Horaris` column 5.
-- Subject filter matches `Horaris` column 4.
-- Only one filter is active at a time because selecting a value in one combo resets the other combos.
+- Subject filter matches `Horaris` column 4, the subject short code, but this filter is hidden for now.
+- Only one visible filter is active at a time because selecting a value in one combo resets the other visible combos.
 - With no active filter, including the fresh endpoint start and after clear/reset, the table shows the 12 time-slot rows and Monday-Friday columns but no schedule items.
 
 Select control rules:
@@ -47,21 +49,68 @@ Select control rules:
 - Teacher full name is built from `Dades de professors`.`Llista`: `NOM` + `COGNOM1` + `COGNOM2`.
 - Sort teacher labels by `COGNOM1`, then `COGNOM2`, then `NOM`.
 - Include teachers that are relevant after active-leave substitution resolution. Do not show an original teacher for timetable rows currently covered by a substitute.
-- Group, classroom, and subject select values are built from distinct values in `Horaris`.
+- Group and classroom select values are built from distinct values in `Horaris`.
+- Subject select values are built from distinct subject codes in `Horaris`, but labels should use the translated full subject name from `Càrrega lectiva`.`assignatures` when available. The subject select must remain hidden in the current UI.
 
 Schedule cell display rules:
 
 - Each matching schedule item must display its visible row information vertically.
 - Do not show placeholder labels or placeholder values for empty group/classroom/teacher fields.
-- Do not show labels such as `Group:`, `Teacher:`, or `Classroom:` inside schedule cells.
+- Subject values shown in schedule cells must use the translated full subject name from `Càrrega lectiva`.`assignatures` when available, falling back to the raw subject code from `Horaris` column 4.
 - The visible format depends on the active filter:
-  - teacher filter: `SUBJECT` / `group or grouped groups` / `classroom`
-  - group filter: `SUBJECT` / `teacher or grouped teachers` / `classroom`
-  - classroom filter: `SUBJECT` / `teacher or grouped teachers` / `group or grouped groups`
+  - teacher filter: full subject name / `Grup: grouped groups` / `Classe: classroom`
+  - group filter: full subject name / `teacher or grouped teachers` / `Classe: classroom`
+  - classroom filter: full subject name / `teacher or grouped teachers` / `Grup: grouped groups`
   - subject filter: `TEACHER` / `group or grouped groups` / `classroom`
 - Teacher values inside cells must use the full teacher name when the alias can be resolved, and the alias when it cannot.
 - When multiple matching items share the same day/time and the same stable visible identity, show one item and group the repeated visible values.
 - If multiple matching items remain distinct after grouping, show each item separately inside that cell.
+- Schedule item bubbles must be vertically centered inside their timetable cell.
+
+Teacher schedule display rules:
+
+- A teacher schedule is shown when the user selects a value in the first combo, the teacher combo.
+- Each teacher-schedule item must show these lines vertically:
+  - subject full name, translated from `Càrrega lectiva`.`assignatures`.`full_name`
+  - `Grup: ` plus the group name from `Horaris`.`GPU001` column 2
+  - `Classe: ` plus the classroom name from `Horaris`.`GPU001` column 5
+- If group or classroom is blank, omit that line.
+- If the same teacher has the same subject in the same time slot more than once, show one item and group the groups comma-separated, for example `Grup: 4A, 4B, 4C`.
+- Grouping for teacher schedules is based on the effective teacher, day, time slot, subject code/full name, and classroom.
+- Teacher-schedule item color is determined by the raw subject code from `Horaris`.`GPU001` column 4:
+  - normal subjects: green
+  - `GUARDIA`: orange
+  - meeting/reunió codes: blue
+  - `TUT`: pink
+- Meeting/reunió/CARREC subject codes are: `RC_ESO`, `RC_FP_BAT`, `RDEP`, `RDIM1`, `RDIM2`, `RDIR`, `REAP`, `REC`, `CARREC`.
+
+Class/group schedule display rules:
+
+- A class/group schedule is shown when the user selects a value in the second combo, the group combo.
+- Each class/group-schedule item must show these lines vertically:
+  - subject full name, translated from `Càrrega lectiva`.`assignatures`.`full_name`
+  - teacher full name, built from `Dades de professors`.`Llista` columns C, D, and E (`NOM`, `COGNOM1`, `COGNOM2`) joined with a single space
+  - `Classe: ` plus the classroom name from `Horaris`.`GPU001` column 5
+- Teacher lookup for class/group schedules uses the teacher code in `Horaris`.`GPU001` column 3, matching `Dades de professors`.`Llista` column F (`REDUIT`), after applying active substitute/effective-teacher resolution.
+- If classroom is blank, omit the `Classe: ` line.
+- If the same group has the same subject in the same time slot more than once, show one item and group the teachers comma-separated, for example `Mikel López Villarroya, Gemma Codina`.
+- Grouping for class/group schedules is based on the selected group, day, time slot, and subject code/full name.
+- If grouped rows have more than one classroom, group classrooms comma-separated on the `Classe: ` line.
+- Class/group-schedule item bubbles must be vertically centered inside their timetable cell.
+
+Classroom schedule display rules:
+
+- A classroom schedule is shown when the user selects a value in the third combo, the classroom combo.
+- Each classroom-schedule item must show these lines vertically:
+  - subject full name, translated from `Càrrega lectiva`.`assignatures`.`full_name`
+  - teacher full name, built from `Dades de professors`.`Llista` columns C, D, and E (`NOM`, `COGNOM1`, `COGNOM2`) joined with a single space
+  - `Grup: ` plus the group name from `Horaris`.`GPU001` column 2
+- Teacher lookup for classroom schedules uses the teacher code in `Horaris`.`GPU001` column 3, matching `Dades de professors`.`Llista` column F (`REDUIT`), after applying active substitute/effective-teacher resolution.
+- If group is blank, omit the `Grup: ` line.
+- If the same classroom has the same subject for the same group in the same time slot more than once, show one item and group the teachers comma-separated, for example `Mikel López Villarroya, Gemma Codina`.
+- If the same classroom has the same subject for the same teacher in the same time slot more than once, show one item and group the groups comma-separated, for example `Grup: 4A, 4B, 4C`.
+- Grouping for classroom schedules is based on the selected classroom, day, time slot, subject code/full name, teacher, and group; when rows share all grouping identity except teacher, group teachers; when rows share all grouping identity except group, group groups.
+- Classroom-schedule item bubbles must be vertically centered inside their timetable cell.
 
 ## Database
 
@@ -85,6 +134,7 @@ Configured table sheets:
 | `Dades de professors` | `tables` row where column A is `Dades de professors`, column B is the spreadsheet ID | `Llista` |
 | `Dades de professors` leave data | Same `Dades de professors` spreadsheet ID | `leave_absence` |
 | `Horaris` | `tables` row where column A is `Horaris`, column B is the spreadsheet ID | `GPU001` |
+| `Càrrega lectiva` subjects | `tables` row where column A is `Càrrega lectiva`, column B is the spreadsheet ID | `assignatures` |
 
 Runtime resolution flow:
 
@@ -102,6 +152,7 @@ This project works with these logical tables:
 
 - `Dades de professors`
 - `Horaris`
+- `Càrrega lectiva`
 
 ## Table: `Horaris`
 
@@ -132,6 +183,38 @@ Observed data quality notes:
 - Teacher alias is usually present in column 3.
 - The example contains rows with a blank teacher alias for row number `328`, group `4F`, subject `DES`, classroom `4F`.
 - Code should tolerate blank teacher aliases when filtering or joining teacher data.
+
+## Table: `Càrrega lectiva`
+
+`Càrrega lectiva` contains teaching-load reference data. This project uses its subject catalog sheet.
+
+### Sheet: `assignatures`
+
+`assignatures` translates short subject codes from `Horaris` into full subject names for display.
+
+Structure:
+
+- Header row is present.
+- Data starts in row 2.
+
+Column schema:
+
+| Header | Meaning |
+| --- | --- |
+| `short_name` | Short subject code. This matches `Horaris` column 4. |
+| `ETAPA` | Educational stage. |
+| `full_name` | Full subject name to display in the endpoint. |
+| `untis_name` | Subject name/code as used by Untis. |
+| `true_subject` | Canonical or normalized subject value. |
+
+Subject translation rules:
+
+- For each `Horaris` row, read the subject code from column 4.
+- Look up that code in `Càrrega lectiva`.`assignatures`.`short_name`.
+- When a matching subject exists, use `full_name` as the user-facing subject name.
+- When no matching subject exists or `full_name` is blank, fall back to the raw `Horaris` subject code.
+- Subject filtering should keep using the raw subject code as the stable value.
+- Subject combo labels and schedule-cell subject text should use the translated full subject name when available.
 
 ## Table: `Dades de professors`
 
@@ -263,6 +346,84 @@ Schedule viewer effective-teacher behavior:
 - A teacher cannot cover two partners at the same time; active substitute coverage is expected to be exclusive for a substitute on the relevant date.
 - Still de-duplicate teachers by `REDUIT` when building filter lists.
 - Keep the original/source teacher fields available internally for audit/debugging and for features that need original timetable lookup.
+
+## Admin Schedule Upload
+
+The endpoint must include an administrator-only workflow for replacing the `Horaris`.`GPU001` schedule sheet from a text file.
+
+Deployment/access requirements:
+
+- The web app deployment must execute as the deploying/creator user.
+- The web app must be accessible to users in the `iernestlluch.cat` Google Workspace domain.
+- The app reads the active user's email on each request.
+- The upload control is visible only when the active user email is `admindomini@iernestlluch.cat`.
+- Server-side upload execution must also verify the active user email before changing the spreadsheet. The UI visibility check is not sufficient security by itself.
+
+Upload UI:
+
+- Display a fixed bottom-right button labeled `CARREGAR HORARI` only for `admindomini@iernestlluch.cat`.
+- Clicking the button opens a modal dialog with:
+  - a file browser for the schedule file
+  - a checkbox labeled `Notificar usuaris d'aquesta actualització.`
+  - `OK` and `CANCEL` buttons
+- The selected file must be named `GPU001.txt`, ignoring case. Valid examples include `GPU001.txt`, `gpu001.txt`, `GPU001.TXT`, and `gpu001.TXT`.
+- The client validates the filename before submitting, and the server repeats the same validation.
+
+Upload file:
+
+- `GPU001.txt` is comma-separated.
+- `GPU001.txt` is encoded as Western / ISO Latin 1, and the client must read it as `ISO-8859-1`.
+- It has exactly the same 7-column structure as the `Horaris`.`GPU001` sheet.
+- The 7 upload columns are: row id, class/group, teacher code, subject, classroom, day, time slot.
+- Blank lines are ignored.
+- Every nonblank row must contain exactly 7 comma-separated columns.
+- Trailing empty columns from a text export may be ignored, but non-empty extra columns must be treated as invalid data.
+
+Upload behavior:
+
+1. Resolve the `Horaris` spreadsheet through the normal DB registry flow:
+   - script property `db`
+   - registry sheet `tables`
+   - logical table `Horaris`
+   - configured sheet `GPU001`
+2. Clear/replace the entire `GPU001` sheet content with the parsed rows from `GPU001.txt`.
+3. Resize the sheet to the uploaded row count and 7 columns after writing the data.
+4. After a successful upload, close or leave the modal only long enough to show success feedback, then reload the main endpoint page automatically.
+5. Reload must navigate the top window to the canonical Apps Script web app URL returned by the server, with a cache-busting query parameter. Do not rely on `window.location.reload()` inside the HtmlService sandbox, because it may reload the iframe URL and leave a blank page.
+6. Reloading the endpoint after upload must show the updated schedule data.
+
+Optional notification:
+
+- If `Notificar usuaris d'aquesta actualització.` is checked, send an email after the sheet is updated.
+- The notification recipient is stored in an easy-to-change constant: `mlvillarroya@gmail.com`.
+- Email subject: `Canvis als horaris del centre.`
+- Plain-text message:
+  `Els horaris del centre acaben de ser actualitzats. Per accedir a la nova versió, obre la intranet i ves a la secció "Racó del professor -> Horaris".`
+- The HTML email body must live in its own Apps Script HTML template file so it can be edited independently.
+
+## Print Schedule
+
+The endpoint must support printing/exporting the currently displayed schedule for non-admin users.
+
+Visibility and state:
+
+- The configured admin user `admindomini@iernestlluch.cat` sees the admin upload button and does not need the `PRINT` button.
+- Every non-admin user must see a `PRINT` button.
+- The `PRINT` button must be disabled while no combo/filter is selected, because the initial schedule is empty and has no document title.
+- The `PRINT` button becomes enabled when a teacher, group, or classroom is selected.
+
+Print/PDF generation:
+
+- Generate the printable document client-side from the schedule currently rendered on screen.
+- The printable output should preserve the same visible text and colors as the screen schedule.
+- The page size should be A4.
+- The document title must be the selected combo label:
+  - selected teacher full name for teacher schedules
+  - selected group for group schedules
+  - selected classroom for classroom schedules
+- The printable schedule must keep the weekday columns Monday through Friday.
+- Only print time-slot rows that have at least one non-empty schedule cell.
+- Empty time-slot rows must be omitted from the printable document.
 
 Guard/substitution candidate behavior:
 

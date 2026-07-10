@@ -2,10 +2,22 @@ const SCRIPT_PROP_DB = 'db';
 const TABLES_SHEET_NAME = 'tables';
 const TABLE_HORARIS = 'Horaris';
 const TABLE_PROFESSORS = 'Dades de professors';
+const TABLE_CARREGA_LECTIVA = 'Càrrega lectiva';
+const ADMIN_EMAIL = 'admindomini@iernestlluch.cat';
+const SCHEDULE_UPLOAD_FILENAME = 'GPU001.txt';
+const SCHEDULE_UPLOAD_FILENAME_KEY = SCHEDULE_UPLOAD_FILENAME.toUpperCase();
+const SCHEDULE_UPLOAD_COLUMN_COUNT = 7;
+const SCHEDULE_UPDATE_NOTIFICATION_EMAIL = 'mlvillarroya@gmail.com';
+const SCHEDULE_UPDATE_EMAIL_SUBJECT = 'Canvis als horaris del centre.';
+const SCHEDULE_UPDATE_EMAIL_TEMPLATE = 'ScheduleUpdateEmail';
+const SCHEDULE_UPDATE_EMAIL_TEXT =
+  'Els horaris del centre acaben de ser actualitzats. Per accedir a la nova versió, ' +
+  'obre la intranet i ves a la secció "Racó del professor -> Horaris".';
 
 const TABLE_SHEETS = {
   [TABLE_HORARIS]: 'GPU001',
   [TABLE_PROFESSORS]: 'Llista',
+  [TABLE_CARREGA_LECTIVA]: 'assignatures',
 };
 
 const PROFESSOR_LEAVE_SHEET_NAME = 'leave_absence';
@@ -48,6 +60,14 @@ const LEAVE_ABSENCE_COLUMNS = {
   comments: 'comments',
 };
 
+const SUBJECT_COLUMNS = {
+  shortName: 'short_name',
+  stage: 'ETAPA',
+  fullName: 'full_name',
+  untisName: 'untis_name',
+  trueSubject: 'true_subject',
+};
+
 function doGet() {
   const appData = loadScheduleViewerData_();
   const template = HtmlService.createTemplateFromFile('Index');
@@ -61,20 +81,24 @@ function doGet() {
 
 function loadScheduleViewerData_() {
   const tableRegistry = loadTableRegistry_();
+  const userEmail = getActiveUserEmail_();
 
   const scheduleSheet = openTableSheet_(tableRegistry, TABLE_HORARIS);
   const professorsSpreadsheet = openTableSpreadsheet_(tableRegistry, TABLE_PROFESSORS);
   const professorsSheet = openConfiguredSheet_(professorsSpreadsheet, TABLE_PROFESSORS);
   const leaveAbsenceSheet = openSheetByName_(professorsSpreadsheet, PROFESSOR_LEAVE_SHEET_NAME);
+  const subjectsSheet = openTableSheet_(tableRegistry, TABLE_CARREGA_LECTIVA);
 
   const professors = loadProfessors_(professorsSheet);
   const leaveAbsences = loadLeaveAbsences_(leaveAbsenceSheet);
+  const subjectsByShortName = indexByCode_(loadSubjects_(subjectsSheet), 'shortName');
   const teachersByAlias = indexByCode_(professors, 'alias');
   const activeLeavesByTeacherCode = indexActiveLeavesByTeacherCode_(leaveAbsences);
   const scheduleRows = loadScheduleRows_(
     scheduleSheet,
     teachersByAlias,
-    activeLeavesByTeacherCode
+    activeLeavesByTeacherCode,
+    subjectsByShortName
   );
 
   return {
@@ -82,6 +106,11 @@ function loadScheduleViewerData_() {
     tables: {
       schedule: TABLE_HORARIS,
       professors: TABLE_PROFESSORS,
+      subjects: TABLE_CARREGA_LECTIVA,
+    },
+    user: {
+      email: userEmail,
+      isAdmin: isAdminUser_(userEmail),
     },
     days: [
       { value: 1, label: 'Monday' },
@@ -93,8 +122,50 @@ function loadScheduleViewerData_() {
     slots: buildNumberRange_(1, 12),
     filters: buildFilterOptions_(scheduleRows, teachersByAlias),
     teachersByAlias,
+    subjectsByShortName,
     scheduleRows,
   };
+}
+
+function uploadScheduleFile(payload) {
+  const userEmail = getActiveUserEmail_();
+
+  if (!isAdminUser_(userEmail)) {
+    throw new Error('Only the schedule administrator can upload timetable files.');
+  }
+
+  const filename = cleanText_(payload && payload.filename);
+  const content = String(payload && payload.content !== undefined ? payload.content : '');
+  const notify = Boolean(payload && payload.notify);
+
+  if (filename.toUpperCase() !== SCHEDULE_UPLOAD_FILENAME_KEY) {
+    throw new Error('The uploaded file must be named exactly "' + SCHEDULE_UPLOAD_FILENAME + '".');
+  }
+
+  const rows = parseScheduleUpload_(content);
+  const scheduleSheet = openTableSheet_(loadTableRegistry_(), TABLE_HORARIS);
+  replaceSheetValues_(scheduleSheet, rows);
+
+  if (notify) {
+    sendScheduleUpdateNotification_();
+  }
+
+  return {
+    rows: rows.length,
+    notified: notify,
+    updatedAt: new Date().toISOString(),
+    reloadUrl: buildReloadUrl_(),
+  };
+}
+
+function buildReloadUrl_() {
+  const serviceUrl = cleanText_(ScriptApp.getService().getUrl());
+
+  if (!serviceUrl) {
+    return '';
+  }
+
+  return serviceUrl + (serviceUrl.indexOf('?') === -1 ? '?' : '&') + 'refresh=' + Date.now();
 }
 
 function loadTableRegistry_() {
@@ -119,6 +190,99 @@ function loadTableRegistry_() {
   });
 
   return registry;
+}
+
+function getActiveUserEmail_() {
+  try {
+    return cleanText_(Session.getActiveUser().getEmail()).toLowerCase();
+  } catch (error) {
+    return '';
+  }
+}
+
+function isAdminUser_(email) {
+  return cleanText_(email).toLowerCase() === ADMIN_EMAIL;
+}
+
+function parseScheduleUpload_(content) {
+  if (!cleanText_(content)) {
+    throw new Error('The uploaded file is empty.');
+  }
+
+  const rows = Utilities.parseCsv(content)
+    .filter(function(row) {
+      return row.some(function(cell) {
+        return cleanText_(cell);
+      });
+    });
+
+  if (!rows.length) {
+    throw new Error('The uploaded file does not contain schedule rows.');
+  }
+
+  rows.forEach(function(row, index) {
+    trimTrailingEmptyCells_(row);
+
+    if (row.length !== SCHEDULE_UPLOAD_COLUMN_COUNT) {
+      throw new Error(
+        'Row ' + (index + 1) + ' must contain exactly ' + SCHEDULE_UPLOAD_COLUMN_COUNT +
+        ' columns: rowId, class, teacher code, subject, classroom, day, time_slot. ' +
+        'Found ' + row.length + '.'
+      );
+    }
+  });
+
+  return rows.map(function(row) {
+    return row.map(function(cell) {
+      return cleanText_(cell);
+    });
+  });
+}
+
+function trimTrailingEmptyCells_(row) {
+  while (row.length > SCHEDULE_UPLOAD_COLUMN_COUNT && !cleanText_(row[row.length - 1])) {
+    row.pop();
+  }
+}
+
+function replaceSheetValues_(sheet, values) {
+  const rowCount = values.length;
+  const columnCount = values[0].length;
+  const currentRows = sheet.getMaxRows();
+  const currentColumns = sheet.getMaxColumns();
+
+  if (currentRows < rowCount) {
+    sheet.insertRowsAfter(currentRows, rowCount - currentRows);
+  }
+
+  if (currentColumns < columnCount) {
+    sheet.insertColumnsAfter(currentColumns, columnCount - currentColumns);
+  }
+
+  sheet.clear();
+  sheet.getRange(1, 1, rowCount, columnCount).setValues(values);
+
+  if (sheet.getMaxRows() > rowCount) {
+    sheet.deleteRows(rowCount + 1, sheet.getMaxRows() - rowCount);
+  }
+
+  if (sheet.getMaxColumns() > columnCount) {
+    sheet.deleteColumns(columnCount + 1, sheet.getMaxColumns() - columnCount);
+  }
+}
+
+function sendScheduleUpdateNotification_() {
+  const htmlBody = HtmlService
+    .createTemplateFromFile(SCHEDULE_UPDATE_EMAIL_TEMPLATE)
+    .evaluate()
+    .getContent();
+
+  MailApp.sendEmail({
+    to: SCHEDULE_UPDATE_NOTIFICATION_EMAIL,
+    subject: SCHEDULE_UPDATE_EMAIL_SUBJECT,
+    body: SCHEDULE_UPDATE_EMAIL_TEXT,
+    htmlBody,
+  });
 }
 
 function getDatabaseSpreadsheetId_() {
@@ -178,12 +342,14 @@ function openSheetByName_(spreadsheet, sheetName, context) {
   return sheet;
 }
 
-function loadScheduleRows_(sheet, teachersByAlias, activeLeavesByTeacherCode) {
+function loadScheduleRows_(sheet, teachersByAlias, activeLeavesByTeacherCode, subjectsByShortName) {
   const values = sheet.getDataRange().getDisplayValues();
 
   return values
     .map(function(row) {
       const sourceTeacherAlias = cleanText_(row[HORARIS_COLUMNS.teacherAlias]);
+      const subjectCode = cleanText_(row[HORARIS_COLUMNS.subject]);
+      const subject = subjectsByShortName[codeKey_(subjectCode)];
       const sourceTeacher = sourceTeacherAlias ? teachersByAlias[codeKey_(sourceTeacherAlias)] : null;
       const effectiveTeacher = resolveEffectiveTeacher_(
         sourceTeacher,
@@ -205,7 +371,9 @@ function loadScheduleRows_(sheet, teachersByAlias, activeLeavesByTeacherCode) {
           effectiveTeacher &&
           sourceTeacher.alias !== effectiveTeacher.alias
         ),
-        subject: cleanText_(row[HORARIS_COLUMNS.subject]),
+        subject: subjectCode,
+        subjectCode,
+        subjectName: subject && subject.fullName ? subject.fullName : subjectCode,
         classroom: cleanText_(row[HORARIS_COLUMNS.classroom]),
         dayNumber: Number(row[HORARIS_COLUMNS.dayNumber]),
         slotNumber: Number(row[HORARIS_COLUMNS.slotNumber]),
@@ -216,6 +384,37 @@ function loadScheduleRows_(sheet, teachersByAlias, activeLeavesByTeacherCode) {
         item.dayNumber <= 5 &&
         item.slotNumber >= 1 &&
         item.slotNumber <= 12;
+    });
+}
+
+function loadSubjects_(sheet) {
+  const values = sheet.getDataRange().getValues();
+
+  if (values.length < 2) {
+    return [];
+  }
+
+  const headers = values[0].map(cleanText_);
+  const headerIndex = indexRequiredHeaders_(headers, [
+    SUBJECT_COLUMNS.shortName,
+    SUBJECT_COLUMNS.fullName,
+  ], 'Subject table');
+
+  return values.slice(1)
+    .map(function(row) {
+      const shortName = cleanText_(row[headerIndex[SUBJECT_COLUMNS.shortName]]);
+      const fullName = cleanText_(row[headerIndex[SUBJECT_COLUMNS.fullName]]);
+
+      return {
+        shortName,
+        stage: cleanText_(row[headerIndex[SUBJECT_COLUMNS.stage]]),
+        fullName: fullName || shortName,
+        untisName: cleanText_(row[headerIndex[SUBJECT_COLUMNS.untisName]]),
+        trueSubject: cleanText_(row[headerIndex[SUBJECT_COLUMNS.trueSubject]]),
+      };
+    })
+    .filter(function(subject) {
+      return subject.shortName;
     });
 }
 
@@ -397,11 +596,13 @@ function buildFilterOptions_(scheduleRows, teachersByAlias) {
     }),
     groups: valuesToOptions_(scheduleRows, 'group'),
     classrooms: valuesToOptions_(scheduleRows, 'classroom'),
-    subjects: valuesToOptions_(scheduleRows, 'subject'),
+    subjects: valuesToOptions_(scheduleRows, 'subject', function(row) {
+      return row.subjectName || row.subject;
+    }),
   };
 }
 
-function valuesToOptions_(rows, key) {
+function valuesToOptions_(rows, key, labelResolver) {
   return uniqueSorted_(
     rows
       .map(function(row) {
@@ -409,9 +610,13 @@ function valuesToOptions_(rows, key) {
       })
       .filter(Boolean)
   ).map(function(value) {
+    const matchingRow = rows.find(function(row) {
+      return row[key] === value;
+    });
+
     return {
       value,
-      label: value,
+      label: labelResolver && matchingRow ? labelResolver(matchingRow) : value,
     };
   });
 }

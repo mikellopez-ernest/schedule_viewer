@@ -16,6 +16,12 @@
         --accent-strong: #0f4f87;
         --subject-bg: #edf7f6;
         --subject-line: #7fc7bd;
+        --guard-bg: #fff4e5;
+        --guard-line: #f59f00;
+        --meeting-bg: #eef6ff;
+        --meeting-line: #4dabf7;
+        --tut-bg: #fff0f6;
+        --tut-line: #f06595;
         --shadow: 0 12px 32px rgba(16, 24, 40, 0.08);
       }
 
@@ -61,7 +67,7 @@
 
       .filters {
         display: grid;
-        grid-template-columns: repeat(4, minmax(180px, 1fr)) auto;
+        grid-template-columns: repeat(3, minmax(180px, 1fr)) auto;
         gap: 12px;
         align-items: end;
         margin-bottom: 18px;
@@ -73,6 +79,10 @@
         color: var(--muted);
         font-size: 12px;
         font-weight: 700;
+      }
+
+      label[hidden] {
+        display: none;
       }
 
       select,
@@ -140,6 +150,7 @@
       td {
         height: 104px;
         padding: 8px;
+        vertical-align: middle;
       }
 
       td.slot {
@@ -152,6 +163,8 @@
       .cell-items {
         display: grid;
         gap: 7px;
+        align-content: center;
+        min-height: 100%;
       }
 
       .item {
@@ -162,6 +175,21 @@
         border-radius: 6px;
         background: var(--subject-bg);
         overflow-wrap: anywhere;
+      }
+
+      .item.guard {
+        border-left-color: var(--guard-line);
+        background: var(--guard-bg);
+      }
+
+      .item.meeting {
+        border-left-color: var(--meeting-line);
+        background: var(--meeting-bg);
+      }
+
+      .item.tut {
+        border-left-color: var(--tut-line);
+        background: var(--tut-bg);
       }
 
       .subject {
@@ -177,6 +205,106 @@
       .empty {
         color: #98a2b3;
         font-size: 12px;
+      }
+
+      .floating-action {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 10;
+        box-shadow: var(--shadow);
+      }
+
+      .floating-action[hidden],
+      .modal-backdrop[hidden] {
+        display: none;
+      }
+
+      button:disabled {
+        border-color: #b8c2d0;
+        background: #c8d0dc;
+        color: #667085;
+        cursor: not-allowed;
+      }
+
+      button:disabled:hover {
+        background: #c8d0dc;
+      }
+
+      .print-title {
+        display: none;
+      }
+
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        display: grid;
+        place-items: center;
+        padding: 16px;
+        background: rgba(31, 41, 51, 0.48);
+      }
+
+      .modal {
+        width: min(460px, 100%);
+        padding: 20px;
+        border-radius: 8px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      .modal h2 {
+        margin: 0 0 16px;
+        font-size: 20px;
+        letter-spacing: 0;
+      }
+
+      .modal-field {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+
+      input[type="file"] {
+        width: 100%;
+        color: var(--text);
+      }
+
+      .checkbox-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin: 14px 0;
+        color: var(--text);
+        font-size: 14px;
+        font-weight: 400;
+      }
+
+      .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .secondary-button {
+        border-color: var(--line);
+        background: var(--surface);
+        color: var(--text);
+      }
+
+      .secondary-button:hover {
+        background: #eef2f7;
+      }
+
+      .upload-status {
+        min-height: 18px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .upload-status.error {
+        color: #b42318;
       }
 
       @media (max-width: 860px) {
@@ -214,6 +342,97 @@
         table {
           min-width: 760px;
         }
+
+        .floating-action {
+          right: 12px;
+          bottom: 12px;
+        }
+      }
+
+      @media print {
+        @page {
+          size: A4 landscape;
+          margin: 10mm;
+        }
+
+        * {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+
+        body {
+          background: #ffffff;
+          font-size: 10px;
+        }
+
+        .app {
+          width: 100%;
+          padding: 0;
+        }
+
+        .topbar,
+        .filters,
+        .floating-action,
+        .modal-backdrop {
+          display: none !important;
+        }
+
+        .print-title {
+          display: block;
+          margin: 0 0 8px;
+          font-size: 18px;
+          font-weight: 800;
+          color: #1f2933;
+        }
+
+        .schedule-wrap {
+          overflow: visible;
+          border: none;
+          border-radius: 0;
+          box-shadow: none;
+        }
+
+        table {
+          width: 100%;
+          min-width: 0;
+          table-layout: fixed;
+        }
+
+        tr.print-empty-row {
+          display: none;
+        }
+
+        th {
+          padding: 5px;
+          font-size: 10px;
+        }
+
+        td {
+          height: auto;
+          min-height: 52px;
+          padding: 4px;
+        }
+
+        th.slot-head,
+        td.slot {
+          width: 42px;
+        }
+
+        .cell-items {
+          gap: 4px;
+        }
+
+        .item {
+          gap: 1px;
+          padding: 4px;
+          border-left-width: 3px;
+          border-radius: 4px;
+        }
+
+        .subject,
+        .meta {
+          font-size: 9px;
+        }
       }
     </style>
   </head>
@@ -245,7 +464,7 @@
             <option value="">All classrooms</option>
           </select>
         </label>
-        <label>
+        <label hidden>
           Subject
           <select id="subjectFilter" data-filter-key="subject">
             <option value="">All subjects</option>
@@ -255,6 +474,7 @@
       </section>
 
       <main class="schedule-wrap" aria-label="Schedule table">
+        <h2 id="printTitle" class="print-title"></h2>
         <table>
           <thead id="scheduleHead"></thead>
           <tbody id="scheduleBody"></tbody>
@@ -262,8 +482,49 @@
       </main>
     </div>
 
+    <button id="adminUploadButton" class="floating-action" type="button" hidden>
+      CARREGAR HORARI
+    </button>
+
+    <button id="printButton" class="floating-action" type="button" hidden disabled>
+      PRINT
+    </button>
+
+    <div id="uploadModal" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="uploadTitle">
+      <section class="modal">
+        <h2 id="uploadTitle">Carregar horari</h2>
+        <div class="modal-field">
+          <label for="scheduleFileInput">GPU001.txt</label>
+          <input id="scheduleFileInput" type="file" accept=".txt">
+        </div>
+        <label class="checkbox-row">
+          <input id="notifyUsersInput" type="checkbox">
+          <span>Notificar usuaris d'aquesta actualització.</span>
+        </label>
+        <div id="uploadStatus" class="upload-status" aria-live="polite"></div>
+        <div class="modal-actions">
+          <button id="cancelUploadButton" class="secondary-button" type="button">CANCEL</button>
+          <button id="confirmUploadButton" type="button">OK</button>
+        </div>
+      </section>
+    </div>
+
     <script>
       const APP_DATA = <?!= bootstrapJson ?>;
+      const REQUIRED_UPLOAD_FILENAME = 'GPU001.txt';
+      const REQUIRED_UPLOAD_FILENAME_KEY = REQUIRED_UPLOAD_FILENAME.toUpperCase();
+      const SCHEDULE_UPLOAD_ENCODING = 'ISO-8859-1';
+      const MEETING_SUBJECT_CODES = new Set([
+        'RC_ESO',
+        'RC_FP_BAT',
+        'RDEP',
+        'RDIM1',
+        'RDIM2',
+        'RDIR',
+        'REAP',
+        'REC',
+        'CARREC',
+      ]);
 
       const selects = [
         document.getElementById('teacherFilter'),
@@ -276,6 +537,16 @@
       const scheduleBody = document.getElementById('scheduleBody');
       const statusEl = document.getElementById('status');
       const resetButton = document.getElementById('resetButton');
+      const adminUploadButton = document.getElementById('adminUploadButton');
+      const printButton = document.getElementById('printButton');
+      const printTitle = document.getElementById('printTitle');
+      const defaultDocumentTitle = document.title;
+      const uploadModal = document.getElementById('uploadModal');
+      const scheduleFileInput = document.getElementById('scheduleFileInput');
+      const notifyUsersInput = document.getElementById('notifyUsersInput');
+      const uploadStatus = document.getElementById('uploadStatus');
+      const cancelUploadButton = document.getElementById('cancelUploadButton');
+      const confirmUploadButton = document.getElementById('confirmUploadButton');
 
       const filterOptionMap = {
         teacherFilter: APP_DATA.filters.teachers,
@@ -290,6 +561,8 @@
         populateSelects();
         renderHeader();
         bindEvents();
+        initAdminUpload();
+        initPrint();
         renderSchedule();
       }
 
@@ -321,6 +594,127 @@
           });
           renderSchedule();
         });
+      }
+
+      function initPrint() {
+        if (APP_DATA.user && APP_DATA.user.isAdmin) {
+          return;
+        }
+
+        printButton.hidden = false;
+        printButton.addEventListener('click', printCurrentSchedule);
+      }
+
+      function initAdminUpload() {
+        if (!APP_DATA.user || !APP_DATA.user.isAdmin) {
+          return;
+        }
+
+        adminUploadButton.hidden = false;
+        adminUploadButton.addEventListener('click', openUploadModal);
+        cancelUploadButton.addEventListener('click', closeUploadModal);
+        uploadModal.addEventListener('click', function(event) {
+          if (event.target === uploadModal) {
+            closeUploadModal();
+          }
+        });
+        scheduleFileInput.addEventListener('change', validateSelectedFile);
+        confirmUploadButton.addEventListener('click', submitScheduleUpload);
+      }
+
+      function openUploadModal() {
+        scheduleFileInput.value = '';
+        notifyUsersInput.checked = false;
+        setUploadStatus('');
+        setUploadBusy(false);
+        uploadModal.hidden = false;
+      }
+
+      function closeUploadModal() {
+        if (confirmUploadButton.disabled) {
+          return;
+        }
+
+        uploadModal.hidden = true;
+      }
+
+      function validateSelectedFile() {
+        const file = scheduleFileInput.files[0];
+
+        if (!file) {
+          setUploadStatus('');
+          return false;
+        }
+
+        if (file.name.toUpperCase() !== REQUIRED_UPLOAD_FILENAME_KEY) {
+          setUploadStatus('El fitxer ha de dir-se ' + REQUIRED_UPLOAD_FILENAME + ', sense importar majúscules o minúscules.', true);
+          return false;
+        }
+
+        setUploadStatus('');
+        return true;
+      }
+
+      function submitScheduleUpload() {
+        const file = scheduleFileInput.files[0];
+
+        if (!file) {
+          setUploadStatus('Selecciona el fitxer ' + REQUIRED_UPLOAD_FILENAME + '.', true);
+          return;
+        }
+
+        if (!validateSelectedFile()) {
+          return;
+        }
+
+        setUploadBusy(true);
+        setUploadStatus('Carregant el fitxer...');
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          google.script.run
+            .withSuccessHandler(function(result) {
+              setUploadStatus('Horari actualitzat: ' + result.rows + ' files.');
+              window.setTimeout(function() {
+                reloadMainPage(result.reloadUrl);
+              }, 900);
+            })
+            .withFailureHandler(function(error) {
+              setUploadBusy(false);
+              setUploadStatus(error && error.message ? error.message : 'No s\'ha pogut carregar el fitxer.', true);
+            })
+            .uploadScheduleFile({
+              filename: file.name,
+              content: event.target.result,
+              notify: notifyUsersInput.checked,
+            });
+        };
+        reader.onerror = function() {
+          setUploadBusy(false);
+          setUploadStatus('No s\'ha pogut llegir el fitxer seleccionat.', true);
+        };
+        reader.readAsText(file, SCHEDULE_UPLOAD_ENCODING);
+      }
+
+      function reloadMainPage(reloadUrl) {
+        if (reloadUrl) {
+          window.open(reloadUrl, '_top');
+          return;
+        }
+
+        window.location.href = window.location.href;
+      }
+
+      function setUploadBusy(isBusy) {
+        confirmUploadButton.disabled = isBusy;
+        cancelUploadButton.disabled = isBusy;
+        scheduleFileInput.disabled = isBusy;
+        notifyUsersInput.disabled = isBusy;
+      }
+
+      function setUploadStatus(message, isError) {
+        uploadStatus.textContent = message;
+        uploadStatus.classList.toggle('error', Boolean(isError));
       }
 
       function resetOtherSelects(activeSelect) {
@@ -355,6 +749,7 @@
 
         APP_DATA.slots.forEach(function(slot) {
           const tr = document.createElement('tr');
+          let rowHasItems = false;
           const slotCell = document.createElement('td');
           slotCell.className = 'slot';
           slotCell.textContent = slot;
@@ -362,15 +757,21 @@
 
           APP_DATA.days.forEach(function(day) {
             const td = document.createElement('td');
-            renderCellItems(td, grid[slot + '-' + day.value] || [], activeFilter);
+            const cellItems = grid[slot + '-' + day.value] || [];
+            if (cellItems.length) {
+              rowHasItems = true;
+            }
+            renderCellItems(td, cellItems, activeFilter);
             tr.appendChild(td);
           });
 
+          tr.classList.toggle('print-empty-row', !rowHasItems);
           fragment.appendChild(tr);
         });
 
         scheduleBody.replaceChildren(fragment);
         updateStatus(activeFilter, rows.length);
+        updatePrintState(activeFilter);
       }
 
       function getActiveFilter() {
@@ -420,7 +821,7 @@
 
         groupScheduleItems(items, activeFilter).forEach(function(item) {
           const itemEl = document.createElement('div');
-          itemEl.className = 'item';
+          itemEl.className = 'item ' + item.colorClass;
           renderScheduleItem(itemEl, item);
           wrapper.appendChild(itemEl);
         });
@@ -441,7 +842,11 @@
               title: display.title,
               line1Values: [],
               line1Set: new Set(),
-              line2: display.line2,
+              line2Values: [],
+              line2Set: new Set(),
+              line1Prefix: display.line1Prefix,
+              line2Prefix: display.line2Prefix,
+              colorClass: display.colorClass,
             });
           }
 
@@ -451,6 +856,13 @@
             if (value && !groupedItem.line1Set.has(value)) {
               groupedItem.line1Set.add(value);
               groupedItem.line1Values.push(value);
+            }
+          });
+
+          display.line2Values.forEach(function(value) {
+            if (value && !groupedItem.line2Set.has(value)) {
+              groupedItem.line2Set.add(value);
+              groupedItem.line2Values.push(value);
             }
           });
         });
@@ -464,6 +876,8 @@
             title: 'subject',
             line1: 'group',
             line2: 'classroom',
+            line1Prefix: '',
+            line2Prefix: '',
             keyFields: ['subject', 'classroom'],
           };
         }
@@ -473,6 +887,8 @@
             title: 'subject',
             line1: 'group',
             line2: 'classroom',
+            line1Prefix: 'Grup: ',
+            line2Prefix: 'Classe: ',
             keyFields: ['subject', 'classroom'],
           };
         }
@@ -482,7 +898,9 @@
             title: 'subject',
             line1: 'teacher',
             line2: 'classroom',
-            keyFields: ['subject', 'classroom'],
+            line1Prefix: '',
+            line2Prefix: 'Classe: ',
+            keyFields: ['subject'],
           };
         }
 
@@ -491,7 +909,9 @@
             title: 'subject',
             line1: 'teacher',
             line2: 'group',
-            keyFields: ['subject', 'group'],
+            line1Prefix: '',
+            line2Prefix: 'Grup: ',
+            keyFields: ['subject'],
           };
         }
 
@@ -500,6 +920,8 @@
             title: 'teacher',
             line1: 'group',
             line2: 'classroom',
+            line1Prefix: '',
+            line2Prefix: '',
             keyFields: ['teacher', 'classroom'],
           };
         }
@@ -508,6 +930,8 @@
           title: 'subject',
           line1: 'group',
           line2: 'classroom',
+          line1Prefix: '',
+          line2Prefix: '',
           keyFields: ['subject', 'classroom'],
         };
       }
@@ -516,7 +940,10 @@
         return {
           title: getDisplayField(item, schema.title) || 'No subject',
           line1Values: toDisplayValues(getDisplayField(item, schema.line1)),
-          line2: getDisplayField(item, schema.line2),
+          line2Values: toDisplayValues(getDisplayField(item, schema.line2)),
+          line1Prefix: schema.line1Prefix || '',
+          line2Prefix: schema.line2Prefix || '',
+          colorClass: getSubjectColorClass(item.subjectCode || item.subject),
           keyParts: schema.keyFields.map(function(field) {
             return getDisplayField(item, field) || '';
           }),
@@ -525,7 +952,7 @@
 
       function getDisplayField(item, field) {
         if (field === 'subject') {
-          return item.subject;
+          return item.subjectName || item.subject;
         }
 
         if (field === 'group') {
@@ -557,8 +984,8 @@
 
       function renderScheduleItem(parent, item) {
         appendLine(parent, item.title || 'No subject', 'subject');
-        appendOptionalLine(parent, item.line1Values.join(', '), 'meta');
-        appendOptionalLine(parent, item.line2, 'meta');
+        appendOptionalLine(parent, item.line1Values.join(', '), 'meta', item.line1Prefix);
+        appendOptionalLine(parent, item.line2Values.join(', '), 'meta', item.line2Prefix);
       }
 
       function appendLine(parent, text, className) {
@@ -568,10 +995,28 @@
         parent.appendChild(line);
       }
 
-      function appendOptionalLine(parent, text, className) {
+      function appendOptionalLine(parent, text, className, prefix) {
         if (text) {
-          appendLine(parent, text, className);
+          appendLine(parent, (prefix || '') + text, className);
         }
+      }
+
+      function getSubjectColorClass(subjectCode) {
+        const code = String(subjectCode || '').toUpperCase();
+
+        if (code === 'GUARDIA') {
+          return 'guard';
+        }
+
+        if (code === 'TUT') {
+          return 'tut';
+        }
+
+        if (MEETING_SUBJECT_CODES.has(code)) {
+          return 'meeting';
+        }
+
+        return 'normal';
       }
 
       function updateStatus(activeFilter, count) {
@@ -581,6 +1026,32 @@
         }
 
         statusEl.textContent = activeFilter.label + ' · ' + count + ' rows';
+      }
+
+      function updatePrintState(activeFilter) {
+        if (printButton.hidden) {
+          return;
+        }
+
+        printButton.disabled = !activeFilter;
+        printTitle.textContent = activeFilter ? activeFilter.label : '';
+      }
+
+      function printCurrentSchedule() {
+        const activeFilter = getActiveFilter();
+
+        if (!activeFilter) {
+          return;
+        }
+
+        printTitle.textContent = activeFilter.label;
+        document.title = activeFilter.label;
+        window.addEventListener('afterprint', restoreDocumentTitleAfterPrint, { once: true });
+        window.print();
+      }
+
+      function restoreDocumentTitleAfterPrint() {
+        document.title = defaultDocumentTitle;
       }
     </script>
   </body>
