@@ -4,6 +4,8 @@ const TABLE_HORARIS = 'Horaris';
 const TABLE_PROFESSORS = 'Dades de professors';
 const TABLE_CARREGA_LECTIVA = 'Càrrega lectiva';
 const ADMIN_EMAIL = 'admindomini@iernestlluch.cat';
+const CACHE_REBUILD_TOKEN_PROPERTY = 'cache_rebuild_token';
+const CACHE_REBUILD_LOG_SHEET_NAME = 'cache_rebuild_log';
 const SCHEDULE_UPLOAD_FILENAME = 'GPU001.txt';
 const SCHEDULE_UPLOAD_FILENAME_KEY = SCHEDULE_UPLOAD_FILENAME.toUpperCase();
 const SCHEDULE_UPLOAD_COLUMN_COUNT = 7;
@@ -68,10 +70,37 @@ const SUBJECT_COLUMNS = {
   trueSubject: 'true_subject',
 };
 
-function doGet() {
-  const appData = loadScheduleViewerData_();
+const CACHE_REBUILD_LOG_HEADERS = [
+  'timestamp',
+  'method',
+  'action',
+  'ok',
+  'authorized',
+  'authorized_by',
+  'user_email',
+  'has_configured_token',
+  'has_request_token',
+  'token_matches',
+  'rows',
+  'updated_at',
+  'duration_ms',
+  'error',
+];
+
+function doGet(e) {
+  const action = cleanText_(e && e.parameter && e.parameter.action);
+  console.log(JSON.stringify({
+    event: 'doGet_received',
+    action,
+    hasToken: Boolean(e && e.parameter && e.parameter.token),
+    parameterKeys: Object.keys((e && e.parameter) || {}),
+  }));
+
+  if (action === 'rebuildScheduleCache') {
+    return handleCacheRebuildRequest_(e && e.parameter, 'GET');
+  }
+
   const template = HtmlService.createTemplateFromFile('Index');
-  template.bootstrapJson = safeJsonForHtml_(appData);
 
   return template
     .evaluate()
@@ -79,27 +108,42 @@ function doGet() {
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
+function doPost(e) {
+  const payload = parsePostPayload_(e);
+  const action = cleanText_(payload.action || (e && e.parameter && e.parameter.action));
+  console.log(JSON.stringify({
+    event: 'doPost_received',
+    action,
+    hasToken: Boolean(payload.token),
+    parameterKeys: Object.keys(payload || {}),
+  }));
+
+  if (action === 'rebuildScheduleCache') {
+    return handleCacheRebuildRequest_(payload, 'POST');
+  }
+
+  return jsonResponse_({
+    ok: false,
+    action,
+    error: 'Unsupported POST action "' + action + '".',
+  });
+}
+
+function getScheduleViewerData() {
+  return loadScheduleViewerData_();
+}
+
 function loadScheduleViewerData_() {
   const tableRegistry = loadTableRegistry_();
   const userEmail = getActiveUserEmail_();
 
-  const scheduleSheet = openTableSheet_(tableRegistry, TABLE_HORARIS);
-  const professorsSpreadsheet = openTableSpreadsheet_(tableRegistry, TABLE_PROFESSORS);
-  const professorsSheet = openConfiguredSheet_(professorsSpreadsheet, TABLE_PROFESSORS);
-  const leaveAbsenceSheet = openSheetByName_(professorsSpreadsheet, PROFESSOR_LEAVE_SHEET_NAME);
-  const subjectsSheet = openTableSheet_(tableRegistry, TABLE_CARREGA_LECTIVA);
+  const cacheSheet = openScheduleCacheSheet_(tableRegistry);
+  let scheduleRows = loadScheduleRowsFromCache_(cacheSheet);
 
-  const professors = loadProfessors_(professorsSheet);
-  const leaveAbsences = loadLeaveAbsences_(leaveAbsenceSheet);
-  const subjectsByShortName = indexByCode_(loadSubjects_(subjectsSheet), 'shortName');
-  const teachersByAlias = indexByCode_(professors, 'alias');
-  const activeLeavesByTeacherCode = indexActiveLeavesByTeacherCode_(leaveAbsences);
-  const scheduleRows = loadScheduleRows_(
-    scheduleSheet,
-    teachersByAlias,
-    activeLeavesByTeacherCode,
-    subjectsByShortName
-  );
+  if (!scheduleRows.length) {
+    rebuildScheduleCache();
+    scheduleRows = loadScheduleRowsFromCache_(cacheSheet);
+  }
 
   return {
     generatedAt: new Date().toISOString(),
@@ -120,9 +164,7 @@ function loadScheduleViewerData_() {
       { value: 5, label: 'Friday' },
     ],
     slots: buildNumberRange_(1, 12),
-    filters: buildFilterOptions_(scheduleRows, teachersByAlias),
-    teachersByAlias,
-    subjectsByShortName,
+    filters: buildFilterOptions_(scheduleRows),
     scheduleRows,
   };
 }
@@ -145,6 +187,7 @@ function uploadScheduleFile(payload) {
   const rows = parseScheduleUpload_(content);
   const scheduleSheet = openTableSheet_(loadTableRegistry_(), TABLE_HORARIS);
   replaceSheetValues_(scheduleSheet, rows);
+  const cacheResult = rebuildScheduleCache();
 
   if (notify) {
     sendScheduleUpdateNotification_();
@@ -152,6 +195,7 @@ function uploadScheduleFile(payload) {
 
   return {
     rows: rows.length,
+    cacheRows: cacheResult.rows,
     notified: notify,
     updatedAt: new Date().toISOString(),
     reloadUrl: buildReloadUrl_(),
@@ -202,6 +246,208 @@ function getActiveUserEmail_() {
 
 function isAdminUser_(email) {
   return cleanText_(email).toLowerCase() === ADMIN_EMAIL;
+}
+
+function handleCacheRebuildRequest_(payload, method) {
+  const action = 'rebuildScheduleCache';
+  const startTime = new Date();
+  const audit = {
+    timestamp: startTime.toISOString(),
+    method: method || '',
+    action,
+    hasRequestToken: Boolean(payload && payload.token),
+  };
+
+  console.log(JSON.stringify({
+    event: 'cache_rebuild_request_received',
+    action,
+    method: audit.method,
+    hasToken: Boolean(payload && payload.token),
+    payloadKeys: Object.keys(payload || {}),
+    startedAt: startTime.toISOString(),
+  }));
+
+  try {
+    const authorization = getCacheRebuildAuthorization_(payload);
+    Object.assign(audit, authorization);
+
+    if (!authorization.authorized) {
+      throw new Error(
+        'Not authorized to rebuild the schedule cache. Use the admin account or provide a valid "' +
+        CACHE_REBUILD_TOKEN_PROPERTY + '" token.'
+      );
+    }
+
+    console.log(JSON.stringify({
+      event: 'cache_rebuild_authorized',
+      action,
+      method: audit.method,
+      authorizedBy: authorization.authorizedBy,
+      authorizedAt: new Date().toISOString(),
+    }));
+
+    const result = rebuildScheduleCache();
+    const finishedAt = new Date();
+    audit.ok = true;
+    audit.rows = result.rows;
+    audit.updatedAt = result.updatedAt;
+    audit.durationMs = finishedAt.getTime() - startTime.getTime();
+
+    console.log(JSON.stringify({
+      event: 'cache_rebuild_success',
+      action,
+      rows: result.rows,
+      updatedAt: result.updatedAt,
+      durationMs: audit.durationMs,
+      finishedAt: finishedAt.toISOString(),
+    }));
+
+    return jsonResponse_({
+      ok: true,
+      action,
+      rows: result.rows,
+      updatedAt: result.updatedAt,
+    });
+  } catch (error) {
+    audit.ok = false;
+    audit.error = error && error.message ? error.message : String(error);
+    audit.durationMs = new Date().getTime() - startTime.getTime();
+
+    console.error(JSON.stringify({
+      event: 'cache_rebuild_error',
+      action,
+      method: audit.method,
+      error: audit.error,
+      durationMs: audit.durationMs,
+    }));
+
+    return jsonResponse_({
+      ok: false,
+      action,
+      error: audit.error,
+    });
+  } finally {
+    writeCacheRebuildAudit_(audit);
+  }
+}
+
+function getCacheRebuildAuthorization_(payload) {
+  const userEmail = getActiveUserEmail_();
+  const isAdmin = isAdminUser_(userEmail);
+  const configuredToken = cleanText_(
+    PropertiesService.getScriptProperties().getProperty(CACHE_REBUILD_TOKEN_PROPERTY)
+  );
+  const requestToken = cleanText_(payload && payload.token);
+  const tokenMatches = Boolean(configuredToken && requestToken && requestToken === configuredToken);
+  const authorized = isAdmin || tokenMatches;
+  const authorizedBy = isAdmin ? 'admin' : tokenMatches ? 'token' : '';
+
+  console.log(JSON.stringify({
+    event: 'cache_rebuild_authorization_check',
+    userEmail,
+    isAdmin,
+    hasConfiguredToken: Boolean(configuredToken),
+    hasRequestToken: Boolean(requestToken),
+    tokenMatches,
+    authorized,
+    authorizedBy,
+  }));
+
+  if (isAdmin) {
+    console.log(JSON.stringify({
+      event: 'cache_rebuild_authorized_by_admin',
+      userEmail,
+    }));
+  }
+
+  if (tokenMatches) {
+    console.log(JSON.stringify({
+      event: 'cache_rebuild_authorized_by_token',
+    }));
+  }
+
+  return {
+    userEmail,
+    authorized,
+    authorizedBy,
+    hasConfiguredToken: Boolean(configuredToken),
+    hasRequestToken: Boolean(requestToken),
+    tokenMatches,
+  };
+}
+
+function writeCacheRebuildAudit_(audit) {
+  try {
+    const tableRegistry = loadTableRegistry_();
+    const spreadsheet = openTableSpreadsheet_(tableRegistry, TABLE_HORARIS);
+    let sheet = spreadsheet.getSheetByName(CACHE_REBUILD_LOG_SHEET_NAME);
+
+    if (!sheet) {
+      sheet = spreadsheet.insertSheet(CACHE_REBUILD_LOG_SHEET_NAME);
+    }
+
+    if (sheet.getLastRow() === 0) {
+      sheet.getRange(1, 1, 1, CACHE_REBUILD_LOG_HEADERS.length).setValues([CACHE_REBUILD_LOG_HEADERS]);
+      sheet.setFrozenRows(1);
+    }
+
+    sheet.appendRow([
+      audit.timestamp || new Date().toISOString(),
+      audit.method || '',
+      audit.action || '',
+      Boolean(audit.ok),
+      Boolean(audit.authorized),
+      audit.authorizedBy || '',
+      audit.userEmail || '',
+      Boolean(audit.hasConfiguredToken),
+      Boolean(audit.hasRequestToken),
+      Boolean(audit.tokenMatches),
+      audit.rows || '',
+      audit.updatedAt || '',
+      audit.durationMs || '',
+      audit.error || '',
+    ]);
+  } catch (logError) {
+    console.error(JSON.stringify({
+      event: 'cache_rebuild_audit_log_error',
+      error: logError && logError.message ? logError.message : String(logError),
+    }));
+  }
+}
+
+function parsePostPayload_(e) {
+  const payload = {};
+
+  if (e && e.parameter) {
+    Object.keys(e.parameter).forEach(function(key) {
+      payload[key] = e.parameter[key];
+    });
+  }
+
+  const postData = e && e.postData && e.postData.contents;
+
+  if (!postData) {
+    return payload;
+  }
+
+  try {
+    const parsed = JSON.parse(postData);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      Object.keys(parsed).forEach(function(key) {
+        payload[key] = parsed[key];
+      });
+    }
+  } catch (error) {
+    // Form-encoded POSTs are already exposed through e.parameter.
+  }
+
+  return payload;
+}
+
+function jsonResponse_(body) {
+  return ContentService
+    .createTextOutput(JSON.stringify(body))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 function parseScheduleUpload_(content) {
@@ -363,6 +609,7 @@ function loadScheduleRows_(sheet, teachersByAlias, activeLeavesByTeacherCode, su
         rowNumber: cleanText_(row[HORARIS_COLUMNS.rowNumber]),
         group: cleanText_(row[HORARIS_COLUMNS.group]),
         sourceTeacherAlias,
+        sourceTeacherName: sourceTeacher ? sourceTeacher.fullName : sourceTeacherAlias,
         sourceTeacherOriginalCode: sourceTeacher ? sourceTeacher.originalCode : '',
         teacherAlias: effectiveTeacherAlias,
         teacherName: effectiveTeacher ? effectiveTeacher.fullName : effectiveTeacherAlias,
@@ -572,7 +819,7 @@ function resolveEffectiveTeacher_(
   return teachersByAlias[codeKey_(activeLeave.substituteCode)] || sourceTeacher;
 }
 
-function buildFilterOptions_(scheduleRows, teachersByAlias) {
+function buildFilterOptions_(scheduleRows) {
   const teacherAliases = uniqueSorted_(
     scheduleRows
       .map(function(row) {
@@ -580,18 +827,18 @@ function buildFilterOptions_(scheduleRows, teachersByAlias) {
       })
       .filter(Boolean),
     function(alias) {
-      const teacher = teachersByAlias[codeKey_(alias)];
-      return teacher ? teacher.sortKey : alias;
+      const matchingRow = findRowByValue_(scheduleRows, 'teacherAlias', alias);
+      return matchingRow && matchingRow.teacherName ? matchingRow.teacherName : alias;
     }
   );
 
   return {
     teachers: teacherAliases.map(function(alias) {
-      const teacher = teachersByAlias[codeKey_(alias)];
+      const matchingRow = findRowByValue_(scheduleRows, 'teacherAlias', alias);
 
       return {
         value: alias,
-        label: teacher ? teacher.fullName : alias,
+        label: matchingRow && matchingRow.teacherName ? matchingRow.teacherName : alias,
       };
     }),
     groups: valuesToOptions_(scheduleRows, 'group'),
@@ -602,6 +849,12 @@ function buildFilterOptions_(scheduleRows, teachersByAlias) {
   };
 }
 
+function findRowByValue_(rows, key, value) {
+  return rows.find(function(row) {
+    return row[key] === value;
+  });
+}
+
 function valuesToOptions_(rows, key, labelResolver) {
   return uniqueSorted_(
     rows
@@ -610,9 +863,7 @@ function valuesToOptions_(rows, key, labelResolver) {
       })
       .filter(Boolean)
   ).map(function(value) {
-    const matchingRow = rows.find(function(row) {
-      return row[key] === value;
-    });
+    const matchingRow = findRowByValue_(rows, key, value);
 
     return {
       value,

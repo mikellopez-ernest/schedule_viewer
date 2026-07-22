@@ -15,24 +15,29 @@ The page must support viewing and filtering schedules by:
 
 The Apps Script web endpoint must:
 
-1. Load the data for `Horaris`, `Dades de professors`, and `Càrrega lectiva` into memory for the request.
-2. Always resolve and read those tables from the Google Spreadsheet database identified by the `db` script property.
-3. Render a responsive HTML page.
-4. Show three visible select controls:
+1. Render a lightweight HTML shell immediately.
+2. Show a centered loading indicator as the first visible screen while schedule data is requested.
+3. Load the generated `Horaris`.`schedule_cache` data asynchronously after the initial HTML is visible.
+4. Always resolve and read database tables from the Google Spreadsheet database identified by the `db` script property.
+5. Hide the loading indicator and render the schedule UI only after the initial schedule data load succeeds.
+6. Show a clear load-error message with a retry action if the asynchronous data load fails.
+7. Render a responsive HTML page.
+8. Show three visible select controls:
    - teacher
    - school group
    - classroom
-5. Keep the fourth subject select/filter as a planned control, but hide it for now.
-6. Build the available select values from the in-memory `Horaris`, `Dades de professors`.`Llista`, `Dades de professors`.`leave_absence`, and `Càrrega lectiva`.`assignatures` data.
-7. Reset the other visible select controls whenever one visible select control receives a value.
-8. Provide a clear/reset button that clears all select controls and returns the schedule table to the initial empty state.
-9. Present the schedule as a grid:
+9. Keep the fourth subject select/filter as a planned control, but hide it for now.
+10. Build the available select values from the in-memory `Horaris`.`schedule_cache` data.
+11. Reset the other visible select controls whenever one visible select control receives a value.
+12. Provide a clear/reset button that clears all select controls and returns the schedule table to the initial empty state.
+13. Present the schedule as a grid:
    - rows are time slots `1` through `12`
    - columns are weekdays Monday through Friday
-10. Always show all 12 time-slot rows, even when a row has no matching schedule item.
-11. Show matching schedule information in the relevant day/time cell when a filter is active.
-12. Show an admin-only schedule upload button for the configured administrator user.
-13. Show a non-admin `PRINT` button for all users except the configured administrator.
+14. Always show all 12 time-slot rows, even when a row has no matching schedule item.
+15. Show matching schedule information in the relevant day/time cell when a filter is active.
+16. Show an admin-only schedule upload button for the configured administrator user.
+17. Show a non-admin `PRINT` button for all users except the configured administrator.
+18. Accept POST or GET requests to the web app endpoint to trigger `rebuildScheduleCache`.
 
 Filtering rules:
 
@@ -81,8 +86,9 @@ Teacher schedule display rules:
   - normal subjects: green
   - `GUARDIA`: orange
   - meeting/reunió codes: blue
-  - `TUT`: pink
-- Meeting/reunió/CARREC subject codes are: `RC_ESO`, `RC_FP_BAT`, `RDEP`, `RDIM1`, `RDIM2`, `RDIR`, `REAP`, `REC`, `CARREC`.
+  - `TUT` and `TUT_FAMILIES`: pink
+  - `3R`: yellow
+- Meeting/reunió/CARREC/FCT/TREC subject codes are blue: `RC_ESO`, `RC_FP_BAT`, `RDEP`, `RDIM1`, `RDIM2`, `RDIR`, `REAP`, `REC`, `CARREC`, `FCT`, `TREC`.
 
 Class/group schedule display rules:
 
@@ -134,6 +140,7 @@ Configured table sheets:
 | `Dades de professors` | `tables` row where column A is `Dades de professors`, column B is the spreadsheet ID | `Llista` |
 | `Dades de professors` leave data | Same `Dades de professors` spreadsheet ID | `leave_absence` |
 | `Horaris` | `tables` row where column A is `Horaris`, column B is the spreadsheet ID | `GPU001` |
+| `Horaris` cache | Same `Horaris` spreadsheet ID | `schedule_cache` |
 | `Càrrega lectiva` subjects | `tables` row where column A is `Càrrega lectiva`, column B is the spreadsheet ID | `assignatures` |
 
 Runtime resolution flow:
@@ -156,7 +163,11 @@ This project works with these logical tables:
 
 ## Table: `Horaris`
 
-`Horaris` is the main schedule table. It contains one row per scheduled subject occurrence.
+`Horaris` contains the source timetable and its generated schedule cache.
+
+### Sheet: `GPU001`
+
+`GPU001` is the source schedule table. It contains one row per scheduled subject occurrence.
 
 Example file studied: `examples/horaris - GPU001.csv`.
 
@@ -183,6 +194,53 @@ Observed data quality notes:
 - Teacher alias is usually present in column 3.
 - The example contains rows with a blank teacher alias for row number `328`, group `4F`, subject `DES`, classroom `4F`.
 - Code should tolerate blank teacher aliases when filtering or joining teacher data.
+
+### Sheet: `schedule_cache`
+
+`schedule_cache` is the generated effective timetable cache used by the endpoint for normal reads.
+
+Rules:
+
+- `schedule_cache` lives in the same spreadsheet as `Horaris`.`GPU001`.
+- `schedule_cache` is generated data. Do not manually edit it except to create the header row initially.
+- The endpoint should read `schedule_cache` instead of recalculating teachers, active leaves, and subject names on every page load.
+- The cache must be rebuilt after `GPU001.txt` upload.
+- The cache must be rebuildable through an exposed function named `rebuildScheduleCache`.
+- The cache must be rebuildable through POST or GET requests to the web app endpoint with `action` equal to `rebuildScheduleCache`.
+- A daily time-driven trigger should run `rebuildScheduleCache` to refresh active leave/substitute status.
+- If `schedule_cache` has only headers/no rows, the endpoint may rebuild it once and then read it.
+
+Header row:
+
+```csv
+row_id,group,source_teacher_code,source_teacher_name,source_teacher_original_code,effective_teacher_code,effective_teacher_name,teacher_was_substituted,subject_code,subject_full_name,classroom,day,slot
+```
+
+Column schema:
+
+| Header | Meaning |
+| --- | --- |
+| `row_id` | Original `GPU001` column 1. |
+| `group` | Original `GPU001` column 2. |
+| `source_teacher_code` | Original `GPU001` column 3, teacher `REDUIT`. |
+| `source_teacher_name` | Original/source teacher full name from `Dades de professors`.`Llista`. |
+| `source_teacher_original_code` | Original/source teacher `ESP` from `Dades de professors`.`Llista`. |
+| `effective_teacher_code` | Teacher `REDUIT` after active leave/substitute resolution. |
+| `effective_teacher_name` | Effective teacher full name after active leave/substitute resolution. |
+| `teacher_was_substituted` | Real boolean indicating whether the source teacher changed to a substitute. |
+| `subject_code` | Original `GPU001` column 4. |
+| `subject_full_name` | Full subject name from `Càrrega lectiva`.`assignatures`, with fallback to `subject_code`. |
+| `classroom` | Original `GPU001` column 5. |
+| `day` | Original `GPU001` column 6. |
+| `slot` | Original `GPU001` column 7. |
+
+Source/effective teacher rules:
+
+- `source_teacher_code`, `source_teacher_name`, and `source_teacher_original_code` must always preserve the teacher from the source `GPU001` row.
+- If that source teacher is on active leave, the source teacher must still remain visible in the cache for audit/debugging.
+- `effective_teacher_code` and `effective_teacher_name` must contain the substitute when active leave resolution succeeds.
+- The endpoint must use `effective_teacher_code` and `effective_teacher_name` for teacher filters and visible teacher display.
+- A row with `source_teacher_name = Gemma Escudé Pont`, `effective_teacher_name = Alba Martínez López`, and `teacher_was_substituted = TRUE` is a successful substitution, not a failed cache rebuild.
 
 ## Table: `Càrrega lectiva`
 
@@ -354,7 +412,9 @@ The endpoint must include an administrator-only workflow for replacing the `Hora
 Deployment/access requirements:
 
 - The web app deployment must execute as the deploying/creator user.
-- The web app must be accessible to users in the `iernestlluch.cat` Google Workspace domain.
+- The web app must be reachable without an interactive Google login so another Apps Script project can call it with `UrlFetchApp`.
+- Manifest/deployment access should be anonymous-reachable, using `access: ANYONE_ANONYMOUS` when available.
+- Because the deployment is reachable anonymously, write actions must be protected inside the endpoint with a shared token.
 - The app reads the active user's email on each request.
 - The upload control is visible only when the active user email is `admindomini@iernestlluch.cat`.
 - Server-side upload execution must also verify the active user email before changing the spreadsheet. The UI visibility check is not sufficient security by itself.
@@ -388,9 +448,10 @@ Upload behavior:
    - configured sheet `GPU001`
 2. Clear/replace the entire `GPU001` sheet content with the parsed rows from `GPU001.txt`.
 3. Resize the sheet to the uploaded row count and 7 columns after writing the data.
-4. After a successful upload, close or leave the modal only long enough to show success feedback, then reload the main endpoint page automatically.
-5. Reload must navigate the top window to the canonical Apps Script web app URL returned by the server, with a cache-busting query parameter. Do not rely on `window.location.reload()` inside the HtmlService sandbox, because it may reload the iframe URL and leave a blank page.
-6. Reloading the endpoint after upload must show the updated schedule data.
+4. Rebuild `Horaris`.`schedule_cache` immediately after writing `GPU001`.
+5. After a successful upload and cache rebuild, close or leave the modal only long enough to show success feedback, then reload the main endpoint page automatically.
+6. Reload must navigate the top window to the canonical Apps Script web app URL returned by the server, with a cache-busting query parameter. Do not rely on `window.location.reload()` inside the HtmlService sandbox, because it may reload the iframe URL and leave a blank page.
+7. Reloading the endpoint after upload must show the updated schedule data from `schedule_cache`.
 
 Optional notification:
 
@@ -400,6 +461,88 @@ Optional notification:
 - Plain-text message:
   `Els horaris del centre acaben de ser actualitzats. Per accedir a la nova versió, obre la intranet i ves a la secció "Racó del professor -> Horaris".`
 - The HTML email body must live in its own Apps Script HTML template file so it can be edited independently.
+
+## Cache Rebuild Endpoint
+
+The same web app endpoint must accept POST or GET requests that trigger a schedule cache rebuild.
+
+Deployment requirement:
+
+- The web app must execute as the deploying/creator user.
+- The web app must be reachable without interactive Google login, because other Apps Script projects call it with `UrlFetchApp`.
+- Security for this action is enforced by the endpoint token check, not by Google login.
+
+Request rules:
+
+- The action must be `rebuildScheduleCache`.
+- POST payload may be JSON or form-encoded.
+- GET query parameters may be used for bookmark/browser access.
+- JSON payload example:
+
+```json
+{
+  "action": "rebuildScheduleCache",
+  "token": "optional-shared-token"
+}
+```
+
+- GET/bookmark URL shape:
+
+```text
+WEB_APP_URL?action=rebuildScheduleCache&token=optional-shared-token
+```
+
+Authorization rules:
+
+- The request is allowed when the active user is the configured administrator `admindomini@iernestlluch.cat`.
+- For script-to-script calls, the request is also allowed when the payload includes `token` matching script property `cache_rebuild_token`.
+- If script property `cache_rebuild_token` is not set, token authorization is disabled and only the admin active user can trigger the rebuild.
+- Unauthorized requests must return JSON, never an HTML page.
+
+Response rules:
+
+- Response must be JSON.
+- Successful response shape:
+
+```json
+{
+  "ok": true,
+  "action": "rebuildScheduleCache",
+  "rows": 2308,
+  "updatedAt": "2026-07-22T06:00:00.000Z"
+}
+```
+
+- Failed response shape:
+
+```json
+{
+  "ok": false,
+  "action": "rebuildScheduleCache",
+  "error": "Error message"
+}
+```
+
+Audit log:
+
+- Every GET/POST cache rebuild request must append one row to `Horaris`.`cache_rebuild_log`.
+- This log is meant to make endpoint calls inspectable without relying on Apps Script execution logs.
+- The token value must never be written to the log.
+- Log columns:
+  - `timestamp`
+  - `method`
+  - `action`
+  - `ok`
+  - `authorized`
+  - `authorized_by`
+  - `user_email`
+  - `has_configured_token`
+  - `has_request_token`
+  - `token_matches`
+  - `rows`
+  - `updated_at`
+  - `duration_ms`
+  - `error`
 
 ## Print Schedule
 
@@ -443,29 +586,31 @@ Absent substitute timetable lookup:
   5. Store the selected substitute's `REDUIT` as the selected/absent teacher code.
   6. Use the resolved original teacher code only for timetable lookup.
 
-## Implementation Changes Needed
+## Current Implementation Notes
 
-To adapt the current project to the updated database:
+The current implementation follows these database and substitution rules:
 
-- Update professor constants from old headers to new headers:
-  - `REDUÏT` -> `REDUIT`
-  - `SITUACIÓ` -> `SITUACIO`
-  - `CORREU XTEC` -> `XTEC`
-  - `CORREU INSTIT` -> `CORREU`
-  - `ACTIVE` -> `ACTIU`
-  - add `JORNADA`, `BAIXA?`, and `SUBST?`
-- Load both `Dades de professors` sheets:
+- Professor constants use the current `Llista` headers:
+  - `REDUIT`
+  - `SITUACIO`
+  - `XTEC`
+  - `CORREU`
+  - `ACTIU`
+  - `JORNADA`
+  - `BAIXA?`
+  - `SUBST?`
+- Both `Dades de professors` sheets are loaded when rebuilding the cache:
   - `Llista`
   - `leave_absence`
-- Build indexes:
+- Cache rebuilding builds indexes:
   - teachers by normalized `REDUIT`
   - teachers by normalized `ESP` when needed
   - active leave rows by normalized original `teacher_code`
   - active leave rows by `substitute_code`
 - Normalize teacher-code joins by trimming spaces, removing accents, and uppercasing values.
 - For leave resolution, first match `leave_absence.teacher_code` against original `ESP`, then defensively against source `REDUIT`.
-- Add robust boolean parsing for real booleans and string `"TRUE"`.
-- Add date parsing/comparison for active leave windows using today in `Europe/Madrid`; blank `end_date` means active after `start_date`.
+- Boolean parsing accepts real booleans and string `"TRUE"`.
+- Active leave date comparison uses today in `Europe/Madrid`; blank `end_date` means active after `start_date`.
 - If an active leave row has a missing/invalid `substitute_code`, fall back to the original teacher without throwing.
 - For `Horaris` rows, keep both source teacher and effective teacher:
   - source teacher `REDUIT`

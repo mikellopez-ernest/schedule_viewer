@@ -1,5 +1,6 @@
 CodeErrors.gs
 examples/**
+docs/**
 SPEC.md
 README.md
 project-context.md

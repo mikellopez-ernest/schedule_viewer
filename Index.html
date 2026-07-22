@@ -22,6 +22,8 @@
         --meeting-line: #4dabf7;
         --tut-bg: #fff0f6;
         --tut-line: #f06595;
+        --three-r-bg: #fff9db;
+        --three-r-line: #f2c94c;
         --shadow: 0 12px 32px rgba(16, 24, 40, 0.08);
       }
 
@@ -42,6 +44,56 @@
         width: min(1480px, 100%);
         margin: 0 auto;
         padding: 20px;
+      }
+
+      .app[hidden] {
+        display: none;
+      }
+
+      .page-loader,
+      .load-error {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: grid;
+        place-items: center;
+        padding: 20px;
+        background: var(--bg);
+      }
+
+      .page-loader[hidden],
+      .load-error[hidden] {
+        display: none;
+      }
+
+      .loader-card,
+      .load-error-card {
+        display: grid;
+        justify-items: center;
+        gap: 14px;
+        width: min(340px, 100%);
+        padding: 28px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .loading-gif {
+        width: 54px;
+        height: 54px;
+        border: 6px solid #d8dee8;
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: loader-spin 0.8s linear infinite;
+      }
+
+      @keyframes loader-spin {
+        to {
+          transform: rotate(360deg);
+        }
       }
 
       .topbar {
@@ -190,6 +242,11 @@
       .item.tut {
         border-left-color: var(--tut-line);
         background: var(--tut-bg);
+      }
+
+      .item.three-r {
+        border-left-color: var(--three-r-line);
+        background: var(--three-r-bg);
       }
 
       .subject {
@@ -373,7 +430,9 @@
         .topbar,
         .filters,
         .floating-action,
-        .modal-backdrop {
+        .modal-backdrop,
+        .page-loader,
+        .load-error {
           display: none !important;
         }
 
@@ -437,7 +496,22 @@
     </style>
   </head>
   <body>
-    <div class="app">
+    <div id="pageLoader" class="page-loader" role="status" aria-live="polite">
+      <div class="loader-card">
+        <div class="loading-gif" aria-hidden="true"></div>
+        <div>Carregant horari...</div>
+      </div>
+    </div>
+
+    <div id="loadError" class="load-error" hidden role="alert">
+      <div class="load-error-card">
+        <strong>No s'ha pogut carregar l'horari.</strong>
+        <div id="loadErrorMessage"></div>
+        <button id="retryLoadButton" type="button">Tornar-ho a provar</button>
+      </div>
+    </div>
+
+    <div id="app" class="app" hidden>
       <header class="topbar">
         <div>
           <h1>Schedule Viewer</h1>
@@ -510,7 +584,7 @@
     </div>
 
     <script>
-      const APP_DATA = <?!= bootstrapJson ?>;
+      let APP_DATA = null;
       const REQUIRED_UPLOAD_FILENAME = 'GPU001.txt';
       const REQUIRED_UPLOAD_FILENAME_KEY = REQUIRED_UPLOAD_FILENAME.toUpperCase();
       const SCHEDULE_UPLOAD_ENCODING = 'ISO-8859-1';
@@ -524,7 +598,15 @@
         'REAP',
         'REC',
         'CARREC',
+        'FCT',
+        'TREC',
       ]);
+
+      const appEl = document.getElementById('app');
+      const pageLoader = document.getElementById('pageLoader');
+      const loadError = document.getElementById('loadError');
+      const loadErrorMessage = document.getElementById('loadErrorMessage');
+      const retryLoadButton = document.getElementById('retryLoadButton');
 
       const selects = [
         document.getElementById('teacherFilter'),
@@ -548,22 +630,61 @@
       const cancelUploadButton = document.getElementById('cancelUploadButton');
       const confirmUploadButton = document.getElementById('confirmUploadButton');
 
-      const filterOptionMap = {
-        teacherFilter: APP_DATA.filters.teachers,
-        groupFilter: APP_DATA.filters.groups,
-        classroomFilter: APP_DATA.filters.classrooms,
-        subjectFilter: APP_DATA.filters.subjects,
-      };
+      let filterOptionMap = {};
 
       init();
 
       function init() {
+        retryLoadButton.addEventListener('click', requestScheduleData);
+        requestScheduleData();
+      }
+
+      function requestScheduleData() {
+        showLoadingState();
+        google.script.run
+          .withSuccessHandler(function(appData) {
+            APP_DATA = appData;
+            filterOptionMap = {
+              teacherFilter: APP_DATA.filters.teachers,
+              groupFilter: APP_DATA.filters.groups,
+              classroomFilter: APP_DATA.filters.classrooms,
+              subjectFilter: APP_DATA.filters.subjects,
+            };
+            bootScheduleViewer();
+          })
+          .withFailureHandler(function(error) {
+            showLoadError(error && error.message ? error.message : 'Error desconegut.');
+          })
+          .getScheduleViewerData();
+      }
+
+      function bootScheduleViewer() {
         populateSelects();
         renderHeader();
         bindEvents();
         initAdminUpload();
         initPrint();
         renderSchedule();
+        showReadyState();
+      }
+
+      function showLoadingState() {
+        appEl.hidden = true;
+        loadError.hidden = true;
+        pageLoader.hidden = false;
+      }
+
+      function showReadyState() {
+        pageLoader.hidden = true;
+        loadError.hidden = true;
+        appEl.hidden = false;
+      }
+
+      function showLoadError(message) {
+        pageLoader.hidden = true;
+        appEl.hidden = true;
+        loadErrorMessage.textContent = message;
+        loadError.hidden = false;
       }
 
       function populateSelects() {
@@ -1008,8 +1129,12 @@
           return 'guard';
         }
 
-        if (code === 'TUT') {
+        if (code === 'TUT' || code === 'TUT_FAMILIES') {
           return 'tut';
+        }
+
+        if (code === '3R') {
+          return 'three-r';
         }
 
         if (MEETING_SUBJECT_CODES.has(code)) {
